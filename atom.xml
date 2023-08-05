@@ -1,4 +1,63 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><updated>2023-07-04T14:10:57Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>reading notes for How to Read a Book (1)</title><id>/post/0001/</id><link href="/post/0001/" rel="alternate" type="text/html"/><updated>2023-07-04T14:10:57Z</updated><published>2023-07-04T14:10:57Z</published><description>该图片由Mirosław i Joanna Bucholc在Pixabay上 发布
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-08-05T00:22:28Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>SVN Command Line Usage With Docker</title><id>/post/0002/</id><link href="/post/0002/" rel="alternate" type="text/html"/><updated>2023-08-05T00:22:28Z</updated><published>2023-08-05T00:22:28Z</published><description>该图片由 Gerd Altmann 在 Pixabay 上发布
+Self-Hosted SVN 服务通常属于 IO 密集型任务，从自搭建情况看，内存占用一般在 2M 多。适合于频繁进行大型二进制文件的存取。
+Server with docker 安装服务 docker …</description><content type="html"><![CDATA[
+        <p>该图片由 Gerd Altmann 在 Pixabay 上<a href="https://pixabay.com/zh/photos/a-book-library-read-literature-3480216/">发布</a></p>
+<h2 id="self-hosted">Self-Hosted</h2>
+<p>SVN 服务通常属于 IO 密集型任务，从自搭建情况看，内存占用一般在 2M 多。适合于频繁进行大型二进制文件的存取。</p>
+<h2 id="server-with-docker">Server with docker</h2>
+<ol>
+<li>安装服务 <code>docker compose up -d</code></li>
+</ol>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="c"># docker-compose.yaml</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;3.3&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nt">svn-server</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  	</span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">garethflowers/svn-server</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  	</span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l">svn-server</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  	</span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="s1">&#39;/svn:/var/opt/svn&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  	</span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="s1">&#39;3690:3690&#39;</span><span class="w">
+</span></span></span></code></pre></div><ol start="2">
+<li>
+<p>生成仓库 <code>docker exec -it svn-server svnadmin create repo</code></p>
+</li>
+<li>
+<p>配置仓库账户文件 位于 <code>^/repo/conf/{svnserver.conf passwd authz}</code></p>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># svnserver.conf</span>
+</span></span><span class="line"><span class="cl">anon-access <span class="o">=</span> none     <span class="c1"># 非注册用户权限</span>
+</span></span><span class="line"><span class="cl">auth-access <span class="o">=</span> write    <span class="c1"># 注册用户权限</span>
+</span></span><span class="line"><span class="cl">password-db <span class="o">=</span> passwd   <span class="c1"># 密码文件路径</span>
+</span></span><span class="line"><span class="cl">authz-db <span class="o">=</span> authz       <span class="c1"># 权限文件路径</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># passwd</span>
+</span></span><span class="line"><span class="cl"><span class="nv">user</span> <span class="o">=</span> password        <span class="c1"># 填写用户名密码注册</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># authz</span>
+</span></span><span class="line"><span class="cl"><span class="o">[</span>repo:/path<span class="o">]</span>
+</span></span><span class="line"><span class="cl"><span class="nv">user</span> <span class="o">=</span> rw              <span class="c1"># 设置用户名拥有的仓库路径权限</span>
+</span></span></code></pre></div><h2 id="client">Client</h2>
+<ol>
+<li>安装客户端 <code>sudo pacman -S subversion</code></li>
+<li>拉取服务端仓库 <code>svn checkout svn://path</code></li>
+<li>其余命令用到再查 <code>svn -h</code></li>
+</ol>
+<h2 id="usage">Usage</h2>
+<blockquote>
+<p>我是为了这点醋，才包的这顿饺子</p>
+</blockquote>
+<h3 id="搭建书库">搭建书库</h3>
+<p>拥有一座图书馆听起来很酷，按照 <a href="https://gist.github.com/zexsphere/604a37648b7ac04cd99a5ebbd851d699">中图法</a> 将现有书籍分类，托管于 SVN 服务中</p>
+<p>
+
+
+
+
+
+
+<img src="https://pic.imgdb.cn/item/64cdb6241ddac507cc70d920.png" alt=""  /></p>
+
+      ]]></content></entry><entry><title>reading notes for How to Read a Book (1)</title><id>/post/0001/</id><link href="/post/0001/" rel="alternate" type="text/html"/><updated>2023-07-04T14:10:57Z</updated><published>2023-07-04T14:10:57Z</published><description>该图片由Mirosław i Joanna Bucholc在Pixabay上 发布
 将读书的主要目的当作是增进自身理解能力的人，被称作“阅读的人（readers）”。
 脉络 信息时代海量的资讯阻碍了理解力，对增进世界的了解没有带来实质的帮助。接收者每天得到的是他人打包好的态度和观 …</description><content type="html"><![CDATA[
         <p>该图片由Mirosław i Joanna Bucholc在Pixabay上
