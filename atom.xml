@@ -1,9 +1,148 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-08-05T00:22:28Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>SVN Command Line Usage With Docker</title><id>/post/0002/</id><link href="/post/0002/" rel="alternate" type="text/html"/><updated>2023-08-05T00:22:28Z</updated><published>2023-08-05T00:22:28Z</published><description>该图片由 Gerd Altmann 在 Pixabay 上发布
-Self-Hosted SVN 服务通常属于 IO 密集型任务，从自搭建情况看，内存占用一般在 2M 多。适合于频繁进行大型二进制文件的存取。
-Server with docker 安装服务 docker …</description><content type="html"><![CDATA[
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-08-06T01:08:47Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>Work With An Efficient Environment</title><id>/post/0003/</id><link href="/post/0003/" rel="alternate" type="text/html"/><updated>2023-08-06T01:08:47Z</updated><published>2023-08-06T01:08:47Z</published><description>该图片由 Gauthier Pous 在 Pixabay 上 发布
+经验分享 文本编辑器 - vim Vim 是高度可配置的，然而定制是一件很个性化的事情，因此我试图避免建议什么应该放进你的 vimrc 里，什么不应该。相反，本书关注的是 Vim 编辑器的核心功能。 …</description><content type="html"><![CDATA[
+        <p>该图片由 Gauthier Pous 在 Pixabay 上 
+
+
+
+
+
+
+
+
+<a href="https://pixabay.com/zh/photos/turtle-turtle-earth-land-market-5201848/" >发布</a></p>
+<h2 id="经验分享">经验分享</h2>
+<h3 id="文本编辑器---vim">文本编辑器 - vim</h3>
+<blockquote>
+<p>Vim 是高度可配置的，然而定制是一件很个性化的事情，因此我试图避免建议什么应该放进你的 vimrc 里，什么不应该。相反，本书关注的是 Vim 编辑器的核心功能。不管你是通过 SSH 登录远端服务器工作，还是在用本地安装了插件而增添了额外功能的 GVim，这些功能都永远在那儿。精通了 Vim 的核心功能，你就获得了一个可移植的、强大的文本编辑工具。</p>
+</blockquote>
+<p>之前求快，学人将 Vim 打造成 IDE，上一堆插件，改键盘映射；又学人将 NVim 打造成 IDE，上一堆插件，改键盘映射。常常插件一更新，一堆报错，又去看文档，修报错。折腾来折腾去，唯独专业知识没学上几分。</p>
+<p>就此老实了，写代码该用 IDE 就用 IDE，慢慢理解 Vim 核心功能才是正道。</p>
+<ul>
+<li>
+<p>练习 vimtutor (20min)</p>
+</li>
+<li>
+<p>实践 <em>vim 实用技巧</em></p>
+</li>
+<li>
+<p>根据需要编写 vimscript</p>
+</li>
+</ul>
+<p>Slow is Smooth, and Smooth is Fast.</p>
+<h3 id="交互式shell---zshhttpsgithubcomzsh-userszsh">交互式shell - 
+
+
+
+
+
+
+
+
+<a href="https://github.com/zsh-users/zsh" >zsh</a></h3>
+<p>zsh 功能很强大，最基础的命令行历史补全，解脱重复工作。</p>
+<ul>
+<li>
+
+
+
+
+
+
+
+
+<a href="https://github.com/ohmyzsh/ohmyzsh" >配置 ohmyzsh</a></li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># ~/.zshrc</span>
+</span></span><span class="line"><span class="cl"><span class="nv">plugins</span><span class="o">=(</span>
+</span></span><span class="line"><span class="cl">	git                  <span class="c1"># git 命令缩写</span>
+</span></span><span class="line"><span class="cl">	zsh-autosuggestions  <span class="c1"># 命令行补全</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">	<span class="c1"># ... https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 不要忘了 source ～/.zshrc 让配置生效</span>
+</span></span></code></pre></div><h3 id="终端复用---tmuxhttpsgithubcomtmuxtmux">终端复用 - 
+
+
+
+
+
+
+
+
+<a href="https://github.com/tmux/tmux" >tmux</a></h3>
+<p>工作中经常远程连接服务器的人，大多经历过链接断开的情况。随着 ssh 断连，正在进行的代码编译、定位bug、修改配置等多个窗口都没了，又要耐着性子重连，敲命令配置。</p>
+<p>更普遍的场景，今天需要继续昨天做不完的工作，通过 tmux 保留工作环境可以省时间，还能帮助回忆起之前的思路。</p>
+<ul>
+<li>
+
+
+
+
+
+
+
+
+<a href="https://github.com/gpakosz/.tmux" >配置.tmux</a></li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 安装tmux</span>
+</span></span><span class="line"><span class="cl">$ sudo pacman -S tmux
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 加载 .tmux 配置</span>
+</span></span><span class="line"><span class="cl">$ <span class="nb">cd</span> 
+</span></span><span class="line"><span class="cl">$ git clone https://github.com/gpakosz/.tmux.git
+</span></span><span class="line"><span class="cl">$ ln -sf .tmux/.tmux.conf
+</span></span><span class="line"><span class="cl">$ cp .tmux/.tmux.conf.local .
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 配合 zsh 使用</span>
+</span></span><span class="line"><span class="cl">$ vim .tmux.conf
+</span></span><span class="line"><span class="cl"><span class="c1"># 添加下面两行，指定 tmux 使用 zsh</span>
+</span></span><span class="line"><span class="cl"><span class="nb">set</span> -g default-shell /bin/zsh
+</span></span><span class="line"><span class="cl"><span class="nb">set</span> -g default-command /bin/zsh
+</span></span><span class="line"><span class="cl">:wq
+</span></span></code></pre></div><h3 id="垃圾回收---trash-cli">垃圾回收 - trash-cli</h3>
+<p>单纯防止误删文件导致不必要的麻烦</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 安装</span>
+</span></span><span class="line"><span class="cl">$ sudo pacman -S trash-cli
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 配置~/.zshrc</span>
+</span></span><span class="line"><span class="cl"><span class="nb">alias</span> <span class="nv">rm</span><span class="o">=</span><span class="s2">&#34;trash&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">alias</span> <span class="nv">rr</span><span class="o">=</span><span class="s2">&#34;trash-restore&#34;</span>
+</span></span></code></pre></div><h2 id="参考">参考</h2>
+<ul>
+<li><em>
+
+
+
+
+
+
+
+
+<a href="https://aquaregia.gitbooks.io/tmux-productive-mouse-free-development_zh/content/" >tmux: Productive Mouse-Free Development</a></em></li>
+<li><em>
+
+
+
+
+
+
+
+
+<a href="https://coolshell.cn/articles/11312.html/comment-page-2#comments" >无插件 VIM 编程技巧</a></em></li>
+<li><em>Vim 实用技巧</em></li>
+<li><em>Vim8 文本处理实战</em></li>
+</ul>
+<h2 id="rip-bram">R.I.P Bram</h2>
+<p>2023/08/03 Esc :wq</p>
+
+      ]]></content></entry><entry><title>SVN Command Line Usage With Docker</title><id>/post/0002/</id><link href="/post/0002/" rel="alternate" type="text/html"/><updated>2023-08-05T00:22:28Z</updated><published>2023-08-05T00:22:28Z</published><description>该图片由 Gerd Altmann 在 Pixabay 上发布
+Self-Hosted SVN 服务属于 IO 密集型任务。相比于 Git，更适合于频繁进行大型二进制文件的存取。且内存占用极低，从自搭建情况看，一般在 3MB 左右，峰值传输 20MB 左右。
+Server …</description><content type="html"><![CDATA[
         <p>该图片由 Gerd Altmann 在 Pixabay 上<a href="https://pixabay.com/zh/photos/a-book-library-read-literature-3480216/">发布</a></p>
 <h2 id="self-hosted">Self-Hosted</h2>
-<p>SVN 服务通常属于 IO 密集型任务，从自搭建情况看，内存占用一般在 2M 多。适合于频繁进行大型二进制文件的存取。</p>
+<p>SVN 服务属于 IO 密集型任务。相比于 Git，更适合于频繁进行大型二进制文件的存取。且内存占用极低，从自搭建情况看，一般在 3MB 左右，峰值传输 20MB 左右。</p>
 <h2 id="server-with-docker">Server with docker</h2>
 <ol>
 <li>安装服务 <code>docker compose up -d</code></li>
@@ -47,7 +186,7 @@ Server with docker 安装服务 docker …</description><content type="html"><![
 <p>我是为了这点醋，才包的这顿饺子</p>
 </blockquote>
 <h3 id="搭建书库">搭建书库</h3>
-<p>拥有一座图书馆听起来很酷，按照 <a href="https://gist.github.com/zexsphere/604a37648b7ac04cd99a5ebbd851d699">中图法</a> 将现有书籍分类，托管于 SVN 服务中</p>
+<p>拥有一座图书馆听起来很酷，按照 <a href="https://gist.github.com/zexsphere/604a37648b7ac04cd99a5ebbd851d699">中图法</a> 将现有书籍分类，托管于云端 SVN 服务中。</p>
 <p>
 
 

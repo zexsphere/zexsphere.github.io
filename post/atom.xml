@@ -1,5 +1,14 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Zex</title><link>/post/</link><description>Recent content in Posts on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Sat, 05 Aug 2023 08:22:28 +0800</lastBuildDate><atom:link href="/post/atom.xml" rel="self" type="application/rss+xml"/><item><title>SVN Command Line Usage With Docker</title><link>/post/0002/</link><pubDate>Sat, 05 Aug 2023 08:22:28 +0800</pubDate><guid>/post/0002/</guid><description>该图片由 Gerd Altmann 在 Pixabay 上发布
-Self-Hosted SVN 服务通常属于 IO 密集型任务，从自搭建情况看，内存占用一般在 2M 多。适合于频繁进行大型二进制文件的存取。
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Zex</title><link>/post/</link><description>Recent content in Posts on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Sun, 06 Aug 2023 09:08:47 +0800</lastBuildDate><atom:link href="/post/atom.xml" rel="self" type="application/rss+xml"/><item><title>Work With An Efficient Environment</title><link>/post/0003/</link><pubDate>Sun, 06 Aug 2023 09:08:47 +0800</pubDate><guid>/post/0003/</guid><description>该图片由 Gauthier Pous 在 Pixabay 上 发布
+经验分享 文本编辑器 - vim Vim 是高度可配置的，然而定制是一件很个性化的事情，因此我试图避免建议什么应该放进你的 vimrc 里，什么不应该。相反，本书关注的是 Vim 编辑器的核心功能。不管你是通过 SSH 登录远端服务器工作，还是在用本地安装了插件而增添了额外功能的 GVim，这些功能都永远在那儿。精通了 Vim 的核心功能，你就获得了一个可移植的、强大的文本编辑工具。
+之前求快，学人将 Vim 打造成 IDE，上一堆插件，改键盘映射；又学人将 NVim 打造成 IDE，上一堆插件，改键盘映射。常常插件一更新，一堆报错，又去看文档，修报错。折腾来折腾去，唯独专业知识没学上几分。
+就此老实了，写代码该用 IDE 就用 IDE，慢慢理解 Vim 核心功能才是正道。
+练习 vimtutor (20min)
+实践 vim 实用技巧
+根据需要编写 vimscript
+Slow is Smooth, and Smooth is Fast.
+交互式shell - zsh zsh 功能很强大，最基础的命令行历史补全，解脱重复工作。
+配置 ohmyzsh # ~/.zshrc plugins=( git # git 命令缩写 zsh-autosuggestions # 命令行补全 # ... https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins ) # 不要忘了 source ～/.</description></item><item><title>SVN Command Line Usage With Docker</title><link>/post/0002/</link><pubDate>Sat, 05 Aug 2023 08:22:28 +0800</pubDate><guid>/post/0002/</guid><description>该图片由 Gerd Altmann 在 Pixabay 上发布
+Self-Hosted SVN 服务属于 IO 密集型任务。相比于 Git，更适合于频繁进行大型二进制文件的存取。且内存占用极低，从自搭建情况看，一般在 3MB 左右，峰值传输 20MB 左右。
 Server with docker 安装服务 docker compose up -d # docker-compose.yaml version: &amp;#39;3.3&amp;#39; services: svn-server: image: garethflowers/svn-server container_name: svn-server volumes: - &amp;#39;/svn:/var/opt/svn&amp;#39; ports: - &amp;#39;3690:3690&amp;#39; 生成仓库 docker exec -it svn-server svnadmin create repo
 配置仓库账户文件 位于 ^/repo/conf/{svnserver.conf passwd authz}
 # svnserver.conf anon-access = none # 非注册用户权限 auth-access = write # 注册用户权限 password-db = passwd # 密码文件路径 authz-db = authz # 权限文件路径 # passwd user = password # 填写用户名密码注册 # authz [repo:/path] user = rw # 设置用户名拥有的仓库路径权限 Client 安装客户端 sudo pacman -S subversion 拉取服务端仓库 svn checkout svn://path 其余命令用到再查 svn -h Usage 我是为了这点醋，才包的这顿饺子</description></item><item><title>reading notes for How to Read a Book (1)</title><link>/post/0001/</link><pubDate>Tue, 04 Jul 2023 22:10:57 +0800</pubDate><guid>/post/0001/</guid><description>该图片由Mirosław i Joanna Bucholc在Pixabay上 发布
