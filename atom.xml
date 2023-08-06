@@ -1,4 +1,178 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-08-06T01:08:47Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>Work With An Efficient Environment</title><id>/post/0003/</id><link href="/post/0003/" rel="alternate" type="text/html"/><updated>2023-08-06T01:08:47Z</updated><published>2023-08-06T01:08:47Z</published><description>该图片由 Gauthier Pous 在 Pixabay 上 发布
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-08-06T07:52:05Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>Solve Common Memory Problems Using Dynamic Analysis Tools</title><id>/post/0004/</id><link href="/post/0004/" rel="alternate" type="text/html"/><updated>2023-08-06T07:52:05Z</updated><published>2023-08-06T07:52:05Z</published><description>该图片由 Jürgen 在 Pixabay 上 发布
+c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，asan 比 valgrind 更快，结果更精确，经过 time 测试，asan 消耗时间是 valgrind 的 1/30。 …</description><content type="html"><![CDATA[
+        <p>该图片由 Jürgen 在 Pixabay 上
+
+
+
+
+
+
+
+
+<a href="https://pixabay.com/zh/photos/ladybug-beetle-leaf-insect-bug-6364312/" >发布</a></p>
+<p>c/c++ 可使用检测工具<code>asan</code> <code>valgrind</code>定位程序问题。一般的检查，asan 比 valgrind 更快，结果更精确，经过 <code>time</code> 测试，asan 消耗时间是 valgrind 的 1/30。</p>
+<h2 id="环境">环境</h2>
+<ul>
+<li>valgrind（3.21.0）</li>
+<li>gcc(13.1.1)</li>
+</ul>
+<h2 id="用法">用法</h2>
+<ul>
+<li>Sanitizer 编译时附带 <code>-fsanitize=address -g</code> 直接执行程序</li>
+<li>Valgrind  编译时附带 <code>-g</code> 使用 Valgrind 执行程序 <code>valgrind --tool=memcheck --leak-check=full ./a.out</code></li>
+</ul>
+<h2 id="触发类型">触发类型</h2>
+<h3 id="内存问题">内存问题</h3>
+<ul>
+<li>
+<p>memory leak</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">*</span><span class="n">str</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="nf">strcpy</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="s">&#34;Hello Leak!&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">str</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/** leak here */</span>
+</span></span><span class="line"><span class="cl"><span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span></code></pre></div></li>
+<li>
+<p>double free</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">*</span><span class="n">str</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="nf">free</span><span class="p">(</span><span class="n">str</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/** double free */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">free</span><span class="p">(</span><span class="n">str</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span></code></pre></div></li>
+<li>
+<p>use after free</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">*</span><span class="n">str</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="nf">free</span><span class="p">(</span><span class="n">str</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/** use after free */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">strcpy</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="s">&#34;Hello Leak!&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">str</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span></code></pre></div></li>
+<li>
+<p>heap buffer overflow</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="o">*</span><span class="n">str</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="nf">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">)</span> <span class="o">*</span> <span class="mi">12</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/* heap-buffer-overflow */</span>
+</span></span><span class="line"><span class="cl"><span class="nf">strcpy</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="s">&#34;Hello World!&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">printf</span><span class="p">(</span><span class="s">&#34;string is :%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">str</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nf">free</span><span class="p">(</span><span class="n">str</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span></code></pre></div></li>
+<li>
+<p>stack buffer overflow</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">char</span> <span class="n">str</span><span class="p">[</span><span class="mi">100</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/** stack-buffer-overflow */</span>
+</span></span><span class="line"><span class="cl"><span class="n">str</span><span class="p">[</span><span class="mi">101</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span></code></pre></div></li>
+<li>
+<p>global buffer overflow</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">array</span><span class="p">[</span><span class="mi">100</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">-</span><span class="mi">1</span><span class="p">};</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/* global-buffer-overflow */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">array</span><span class="p">[</span><span class="mi">101</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div></li>
+<li>
+<p>alloc/dealloc mismatch</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="o">*</span><span class="n">str</span> <span class="o">=</span> <span class="n">new</span> <span class="kt">char</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="cm">/** alloc-dealloc-mismatch*/</span>  
+</span></span><span class="line"><span class="cl">    <span class="n">delete</span> <span class="n">str</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div></li>
+</ul>
+<p>​</p>
+<p>sanitizer 给出的信息比较直观，如 memory leak 的执行信息（类型、行数、影响）：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">Hello Leak!
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">=================================================================</span>
+</span></span><span class="line"><span class="cl"><span class="o">==</span><span class="nv">212706</span><span class="o">==</span>ERROR: LeakSanitizer: detected memory leaks
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Direct leak of <span class="m">100</span> byte<span class="o">(</span>s<span class="o">)</span> in <span class="m">1</span> object<span class="o">(</span>s<span class="o">)</span> allocated from:
+</span></span><span class="line"><span class="cl">    <span class="c1">#0 0x7f6aa04e1359 in __interceptor_malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">#1 0x55c93274c1aa in main ***************************/leak.c:7</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">#2 0x7f6aa023984f  (/usr/lib/libc.so.6+0x2384f) (BuildId: 2f005a79cd1a8e385972f5a102f16adba414d75e)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">SUMMARY: AddressSanitizer: <span class="m">100</span> byte<span class="o">(</span>s<span class="o">)</span> leaked in <span class="m">1</span> allocation<span class="o">(</span>s<span class="o">)</span>.
+</span></span></code></pre></div><h3 id="线程问题附带测试">线程问题（附带测试）</h3>
+<p>多线程场景下常见的错误</p>
+<ul>
+<li>
+<p>data race</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">g_var</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span><span class="o">*</span> <span class="nf">thread1</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl">    <span class="n">g_var</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span><span class="o">*</span> <span class="nf">thread2</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl">    <span class="n">g_var</span><span class="o">++</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div></li>
+<li>
+<p>dead lock</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">pthread_mutex_t</span> <span class="n">mutex_a</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">pthread_mutex_t</span> <span class="n">mutex_b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">pthread_barrier_t</span> <span class="n">barrier</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span><span class="o">*</span> <span class="nf">lock_a</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_a</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pthread_barrier_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">barrier</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nf">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_b</span><span class="p">);</span>  <span class="cm">/* 等待 lock_b 释放*/</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_b</span><span class="p">);</span>        
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_a</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span><span class="o">*</span> <span class="nf">lock_b</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_b</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pthread_barrier_wait</span><span class="p">(</span><span class="o">&amp;</span><span class="n">barrier</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="nf">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_a</span><span class="p">);</span>  <span class="cm">/* 等待 lock_a 释放 */</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_a</span><span class="p">);</span>        
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_b</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div></li>
+</ul>
+<p>data race 方面，tsan 相比 valgrind 结果基本一致，但速度完胜。</p>
+<p>dead lock 方面，valgrind 能检测出线程退出未解锁导致的死锁，对相互死锁没有办法，tsan 对死锁完全没有办法。</p>
+<h2 id="参考">参考</h2>
+<ul>
+<li><em>
+
+
+
+
+
+
+
+
+<a href="https://github.com/google/sanitizers" >Sanitizers</a></em></li>
+</ul>
+
+      ]]></content></entry><entry><title>Work With An Efficient Environment</title><id>/post/0003/</id><link href="/post/0003/" rel="alternate" type="text/html"/><updated>2023-08-06T01:08:47Z</updated><published>2023-08-06T01:08:47Z</published><description>该图片由 Gauthier Pous 在 Pixabay 上 发布
 经验分享 文本编辑器 - vim Vim 是高度可配置的，然而定制是一件很个性化的事情，因此我试图避免建议什么应该放进你的 vimrc 里，什么不应该。相反，本书关注的是 Vim 编辑器的核心功能。 …</description><content type="html"><![CDATA[
         <p>该图片由 Gauthier Pous 在 Pixabay 上 
 
