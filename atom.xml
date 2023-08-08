@@ -1,4 +1,108 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-08-06T07:52:05Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>Solve Common Memory Problems Using Dynamic Analysis Tools</title><id>/post/0004/</id><link href="/post/0004/" rel="alternate" type="text/html"/><updated>2023-08-06T07:52:05Z</updated><published>2023-08-06T07:52:05Z</published><description>该图片由 Jürgen 在 Pixabay 上 发布
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-08-07T02:57:10Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>Self-hosting services using the nginx ssl proxy</title><id>/post/0005/</id><link href="/post/0005/" rel="alternate" type="text/html"/><updated>2023-08-07T02:57:10Z</updated><published>2023-08-07T02:57:10Z</published><description>该图片由 Pete Linforth 在 Pixabay 上发布
+结构图 基础点 容器可以加入同一个网络中，并相互通过容器名通信 expect 可以用脚本自动化控制命令行下程序与用户的交互 步骤 1. 生成自签名证书 openssl req -x509 -newkey …</description><content type="html"><![CDATA[
+        <p>该图片由 Pete Linforth 在 Pixabay 上<a href="https://pixabay.com/zh/illustrations/cyber-security-information-security-3400657/">发布</a></p>
+<h2 id="结构图">结构图</h2>
+<p>
+
+
+
+
+
+
+<img src="https://pic.imgdb.cn/item/64d0e1231ddac507cc915777.png" alt=""  /></p>
+<h2 id="基础点">基础点</h2>
+<ol>
+<li>容器可以加入同一个网络中，并相互通过容器名通信</li>
+<li>expect 可以用脚本自动化控制命令行下程序与用户的交互</li>
+</ol>
+<h2 id="步骤">步骤</h2>
+<h3 id="1-生成自签名证书">1. 生成自签名证书</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days <span class="m">365</span>
+</span></span></code></pre></div><h3 id="2-配置-nginxconf">2. 配置 nginx.conf</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">    server <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        listen       <span class="m">11443</span> ssl<span class="p">;</span>
+</span></span><span class="line"><span class="cl">        server_name  localhost<span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        ssl_certificate       /usr/local/nginx/certs/cert.pem<span class="p">;</span>
+</span></span><span class="line"><span class="cl">        ssl_certificate_key   /usr/local/nginx/certs/key.pem<span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        location / <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            proxy_set_header  Host              <span class="nv">$http_host</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            proxy_set_header  X-Real-IP         <span class="nv">$remote_addr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            proxy_set_header  X-Forwarded-For   <span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">            proxy_pass http://web:80<span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="c1"># ......</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># server { # 新增 Web 服务</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">#    ...</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># }</span>
+</span></span></code></pre></div><h3 id="3-expect-脚本">3. expect 脚本</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># pem.expect</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#!/usr/bin/expect</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">set</span> timeout <span class="m">30</span>
+</span></span><span class="line"><span class="cl"><span class="nb">set</span> password <span class="s2">&#34;123456&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">spawn /usr/local/nginx/sbin/nginx
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">expect <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;PEM&#34;</span> <span class="o">{</span> send <span class="s2">&#34;</span><span class="nv">$password</span><span class="s2">\r&#34;</span><span class="p">;</span> exp_continue <span class="o">}</span> <span class="c1"># 多个使用 SSL 的服务可以重复 send 多次</span>
+</span></span><span class="line"><span class="cl">    eof
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></div><h3 id="4-编译生成-nginx-镜像">4. 编译生成 nginx 镜像</h3>
+<p>也可以直接用现成的，打算熟悉下过程，有空读读源码</p>
+<p><code>docker build -t nginx-proxy .</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">FROM</span><span class="s"> ubuntu</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">WORKDIR</span><span class="s"> /code</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="c"># ubuntu 替换镜像源</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    <span class="o">&amp;&amp;</span> sed -i s@/security.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    <span class="o">&amp;&amp;</span> apt-get clean <span class="o">&amp;&amp;</span> apt-get update -y<span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="c"># 编译 nginx 的库 &amp; 工具</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> apt-get install gcc make libz-dev libpcre3-dev libssl-dev expect wget -y<span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="c"># 编译 nginx</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">RUN</span> wget http://nginx.org/download/nginx-1.24.0.tar.gz <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    <span class="o">&amp;&amp;</span> tar xf ./nginx-1.24.0.tar.gz <span class="o">&amp;&amp;</span> <span class="nb">cd</span> ./nginx-1.24.0 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    <span class="o">&amp;&amp;</span> ./configure --prefix<span class="o">=</span>/usr/local/nginx --with-http_ssl_module  <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    <span class="o">&amp;&amp;</span> make <span class="o">&amp;&amp;</span> make install<span class="err">
+</span></span></span></code></pre></div><h3 id="5-compose-部署">5. compose 部署</h3>
+<p>创建互联网络 <code>docker network create ngx-net</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;3&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="c"># 内部监听端口 80  </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">web</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">python:3.7-alpine</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l">web</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l">always</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">ngx-net</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;3&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">services</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">nginx</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">nginx-proxy:latest</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l">nginx-proxy</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">ngx-net</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">ngx/certs:/usr/local/nginx/certs</span><span class="w"> </span><span class="c"># 存放步骤1 pem 证书</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">ngx/conf:/usr/local/nginx/conf  </span><span class="w"> </span><span class="c"># 存放步骤2 conf 文件</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">ngx/sbin:/usr/local/nginx/sbin  </span><span class="w"> </span><span class="c"># 存放步骤2 expect 脚本</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="m">11443</span><span class="p">:</span><span class="m">11443</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span></code></pre></div><h3 id="6-启动">6. 启动</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ docker compose up -d
+</span></span><span class="line"><span class="cl">$ docker <span class="nb">exec</span> -it nginx-proxy expect pem.expect
+</span></span></code></pre></div><h2 id="总结">总结</h2>
+<p>容器隔离了环境，复杂度转移到了部署层面上。以上查了不少资料，在弄完成功 https 访问的时候居然产生了谜一般的成就感，有点离谱了……</p>
+
+      ]]></content></entry><entry><title>Solve Common Memory Problems Using Dynamic Analysis Tools</title><id>/post/0004/</id><link href="/post/0004/" rel="alternate" type="text/html"/><updated>2023-08-06T07:52:05Z</updated><published>2023-08-06T07:52:05Z</published><description>该图片由 Jürgen 在 Pixabay 上 发布
 c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，asan 比 valgrind 更快，结果更精确，经过 time 测试，asan 消耗时间是 valgrind 的 1/30。 …</description><content type="html"><![CDATA[
         <p>该图片由 Jürgen 在 Pixabay 上
 
@@ -125,8 +229,7 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 <li>
 <p>dead lock</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">pthread_mutex_t</span> <span class="n">mutex_a</span><span class="p">;</span>
-</span></span><span class="line"><span class="cl"><span class="kt">pthread_mutex_t</span> <span class="n">mutex_b</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="kt">pthread_mutex_t</span> <span class="n">mutex_a</span><span class="p">,</span> <span class="n">mutex_b</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl"><span class="kt">pthread_barrier_t</span> <span class="n">barrier</span><span class="p">;</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="kt">void</span><span class="o">*</span> <span class="nf">lock_a</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">arg</span><span class="p">)</span>
@@ -138,7 +241,6 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 </span></span><span class="line"><span class="cl">        <span class="nf">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_b</span><span class="p">);</span>  <span class="cm">/* 等待 lock_b 释放*/</span>
 </span></span><span class="line"><span class="cl">        <span class="nf">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_b</span><span class="p">);</span>        
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="nf">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_a</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
@@ -151,13 +253,15 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 </span></span><span class="line"><span class="cl">        <span class="nf">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_a</span><span class="p">);</span>  <span class="cm">/* 等待 lock_a 释放 */</span>
 </span></span><span class="line"><span class="cl">        <span class="nf">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_a</span><span class="p">);</span>        
 </span></span><span class="line"><span class="cl">    <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="nf">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mutex_b</span><span class="p">);</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></div></li>
 </ul>
 <p>data race 方面，tsan 相比 valgrind 结果基本一致，但速度完胜。</p>
 <p>dead lock 方面，valgrind 能检测出线程退出未解锁导致的死锁，对相互死锁没有办法，tsan 对死锁完全没有办法。</p>
+<h2 id="想法">想法</h2>
+<p>比排查手段更重要的是排查思路。线上的环境不比生产环境工具齐全，还有着种种约束（访问时段限制，服务启停限制等）增加成本。保持思路清晰，通过服务日志、系统记录信息寻找关键点，更考验对系统的整体了解程度。</p>
+<p>比排查思路更接近问题源头的就是设计思路了……</p>
 <h2 id="参考">参考</h2>
 <ul>
 <li><em>
@@ -247,7 +351,7 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 
 <a href="https://github.com/tmux/tmux" >tmux</a></h3>
 <p>工作中经常远程连接服务器的人，大多经历过链接断开的情况。随着 ssh 断连，正在进行的代码编译、定位bug、修改配置等多个窗口都没了，又要耐着性子重连，敲命令配置。</p>
-<p>更普遍的场景，今天需要继续昨天做不完的工作，通过 tmux 保留工作环境可以省时间，还能帮助回忆起之前的思路。</p>
+<p>或者，今天需要继续昨天做不完的工作，通过 tmux 保留工作环境可以省时间，还能帮助回忆起之前的思路。</p>
 <ul>
 <li>
 
