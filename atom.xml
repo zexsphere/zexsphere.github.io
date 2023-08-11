@@ -1,4 +1,181 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-08-07T02:57:10Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>Self-hosting services using the nginx ssl proxy</title><id>/post/0005/</id><link href="/post/0005/" rel="alternate" type="text/html"/><updated>2023-08-07T02:57:10Z</updated><published>2023-08-07T02:57:10Z</published><description>该图片由 Pete Linforth 在 Pixabay 上发布
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-08-08T01:54:51Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>Intro to Tun/Tap</title><id>/post/0006/</id><link href="/post/0006/" rel="alternate" type="text/html"/><updated>2023-08-08T01:54:51Z</updated><published>2023-08-08T01:54:51Z</published><description>该图片由 Simon Oberthaler 在 Pixabay 上 发布
+原理 +---------------+ +---------------+ +---------------+ | application A | | application B | | …</description><content type="html"><![CDATA[
+        <p>该图片由 Simon Oberthaler 在 Pixabay 上
+
+
+
+
+
+
+
+
+<a href="https://pixabay.com/zh/photos/elephants-herd-pachyderms-mammals-8171393/" >发布</a></p>
+<h2 id="原理">原理</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-basic" data-lang="basic"><span class="line"><span class="cl"><span class="o">+---------------+</span><span class="w">         </span><span class="o">+---------------+</span><span class="w">         </span><span class="o">+---------------+</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span><span class="w"> </span><span class="vg">application</span><span class="w"> </span><span class="vg">A</span><span class="w"> </span><span class="o">|</span><span class="w">         </span><span class="o">|</span><span class="w"> </span><span class="vg">application</span><span class="w"> </span><span class="vg">B</span><span class="w"> </span><span class="o">|</span><span class="w">         </span><span class="o">|</span><span class="w"> </span><span class="vg">application</span><span class="w"> </span><span class="vg">C</span><span class="w"> </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">+-------^-------+</span><span class="w">         </span><span class="o">+-------+-------+</span><span class="w">         </span><span class="o">+-------+-------+</span><span class="w">       </span><span class="vg">user</span><span class="o">-</span><span class="vg">mode</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                         </span><span class="o">|</span><span class="w">                         </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">+-----------------------------------------------------------------------------------+</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                         </span><span class="o">|</span><span class="w">                         </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                 </span><span class="o">+-------</span><span class="vg">v</span><span class="o">-------------------------</span><span class="vg">v</span><span class="o">-------+</span><span class="w">     </span><span class="vg">kernel</span><span class="o">-</span><span class="vg">mode</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                 </span><span class="o">|</span><span class="w">               </span><span class="vg">layer</span><span class="w"> </span><span class="vg">socket</span><span class="w">              </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                 </span><span class="o">+--------------------^--------------------+</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                                      </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                 </span><span class="o">+--------------------</span><span class="vg">v</span><span class="o">--------------------+</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                 </span><span class="o">|</span><span class="w">              </span><span class="vg">TCP</span><span class="o">/</span><span class="vg">IP</span><span class="w"> </span><span class="vg">stack</span><span class="w">               </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                 </span><span class="o">+--------^-----------------------^--------+</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                          </span><span class="o">|</span><span class="w">                       </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">+-------</span><span class="vg">v</span><span class="o">-------+</span><span class="w">         </span><span class="o">+--------</span><span class="vg">v</span><span class="o">--------+</span><span class="w">     </span><span class="o">+--------</span><span class="vg">v</span><span class="o">--------+</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span><span class="w"> </span><span class="o">/</span><span class="vg">dev</span><span class="o">/</span><span class="vg">net</span><span class="o">/</span><span class="vg">tun</span><span class="w">  </span><span class="o">|</span><span class="w">         </span><span class="o">|</span><span class="w"> </span><span class="vg">Drivers</span><span class="w"> </span><span class="vg">for</span><span class="w">     </span><span class="o">|</span><span class="w">     </span><span class="o">|</span><span class="w"> </span><span class="vg">Drivers</span><span class="w"> </span><span class="vg">for</span><span class="w">     </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span><span class="w">   </span><span class="vg">char</span><span class="w"> </span><span class="vg">drivers</span><span class="o">|</span><span class="w">         </span><span class="o">|</span><span class="w">    </span><span class="vg">virtual</span><span class="w"> </span><span class="vg">NIC</span><span class="w">  </span><span class="o">|</span><span class="w">     </span><span class="o">|</span><span class="w">   </span><span class="vg">pysical</span><span class="w"> </span><span class="vg">NIC</span><span class="w">   </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">+-------^-------+</span><span class="w">         </span><span class="o">+--------^--------+</span><span class="w">     </span><span class="o">+--------^--------+</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                          </span><span class="o">|</span><span class="w">                       </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                 </span><span class="o">+--------</span><span class="vg">v</span><span class="o">--------+</span><span class="w">     </span><span class="o">+--------</span><span class="vg">v</span><span class="o">--------+</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">        </span><span class="p">(</span><span class="vg">tun</span><span class="w"> </span><span class="vg">tap</span><span class="p">)</span><span class="o">|</span><span class="w">    </span><span class="vg">virtual</span><span class="w"> </span><span class="vg">NIC</span><span class="w">  </span><span class="o">|</span><span class="w">     </span><span class="o">|</span><span class="w">   </span><span class="vg">pysical</span><span class="w"> </span><span class="vg">NIC</span><span class="w">   </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                 </span><span class="o">+--------^--------+</span><span class="w">     </span><span class="o">+--------^--------+</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                          </span><span class="o">|</span><span class="w">                       </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">|</span><span class="w">                          </span><span class="o">|</span><span class="w">                       </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">+--------------------------+</span><span class="w">                       </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="w">                                                           </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">+-----------------------------------------------------------------------------------+</span>
+</span></span><span class="line"><span class="cl"><span class="w">                                                           </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="w">                                      </span><span class="o">+--------------+</span><span class="w">     </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="w">                                      </span><span class="o">|</span><span class="w">   </span><span class="vg">Internet</span><span class="w">   </span><span class="o">&lt;-----+</span>
+</span></span><span class="line"><span class="cl"><span class="w">                                      </span><span class="o">+--------------+</span>
+</span></span></code></pre></div><h2 id="实践">实践</h2>
+<h3 id="code">code</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/if.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;linux/if_tun.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;sys/ioctl.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">tun_alloc</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">ifreq</span> <span class="n">ifr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="o">*</span><span class="n">clonedev</span> <span class="o">=</span> <span class="s">&#34;/dev/net/tun&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 打开 /dev/net/tun */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">((</span><span class="n">fd</span> <span class="o">=</span> <span class="nf">open</span><span class="p">(</span><span class="n">clonedev</span><span class="p">,</span> <span class="n">O_RDWR</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">fd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ifr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ifr</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ifr</span><span class="p">.</span><span class="n">ifr_flags</span> <span class="o">=</span> <span class="n">flags</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 未指定设备名称时，由内核分配设备名 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">dev</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">strncpy</span><span class="p">(</span><span class="n">ifr</span><span class="p">.</span><span class="n">ifr_name</span><span class="p">,</span> <span class="n">dev</span><span class="p">,</span> <span class="n">IFNAMSIZ</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 通过 ioctl() 向内核注册网络设备，完成创建虚拟接口
+</span></span></span><span class="line"><span class="cl"><span class="cm">     * 通过文件描述符 fd 关联，与接口通信 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="n">err</span> <span class="o">=</span> <span class="nf">ioctl</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">TUNSETIFF</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">ifr</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="c1">//strcpy(dev, ifr.ifr_name); // this line leads to errors.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">fd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="n">nread</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">char</span> <span class="n">buffer</span><span class="p">[</span><span class="mi">1500</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">((</span><span class="n">fd</span> <span class="o">=</span> <span class="nf">tun_alloc</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">IFF_TUN</span> <span class="o">|</span> <span class="n">IFF_NO_PI</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;tun alloc failed!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="n">nread</span> <span class="o">=</span> <span class="nf">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buffer</span><span class="p">)))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;read failed!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">close</span><span class="p">(</span><span class="n">fd</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        
+</span></span><span class="line"><span class="cl">        <span class="cm">/* process packets here */</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* 程序关闭文件描述符、网络设备和所有相应的路线将会消失 */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="compile--run">compile &amp; run</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ gcc tun.c -o tun
+</span></span><span class="line"><span class="cl">$ ./tun
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># open another window</span>
+</span></span><span class="line"><span class="cl">$ ip addr add 10.0.0.1/24 dev tun0
+</span></span><span class="line"><span class="cl">$ ip link <span class="nb">set</span> tun0 up
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># test packet acceptance</span>
+</span></span><span class="line"><span class="cl">$ ping 10.0.0.2
+</span></span><span class="line"><span class="cl">PING 10.0.0.2 <span class="o">(</span>10.0.0.2<span class="o">)</span> 56<span class="o">(</span>84<span class="o">)</span> bytes of data.
+</span></span><span class="line"><span class="cl"><span class="m">64</span> bytes from 10.0.0.2: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">1</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">64</span> <span class="nv">time</span><span class="o">=</span>0.024 ms
+</span></span><span class="line"><span class="cl"><span class="m">64</span> bytes from 10.0.0.2: <span class="nv">icmp_seq</span><span class="o">=</span><span class="m">2</span> <span class="nv">ttl</span><span class="o">=</span><span class="m">64</span> <span class="nv">time</span><span class="o">=</span>0.035 ms
+</span></span><span class="line"><span class="cl">...
+</span></span></code></pre></div><h2 id="参考">参考</h2>
+<ul>
+<li>
+<p><em>
+
+
+
+
+
+
+
+
+<a href="https://backreference.org/2010/03/26/tuntap-interface-tutorial/" >Tun/Tap interface tutorial</a></em></p>
+</li>
+<li>
+<p><em>
+
+
+
+
+
+
+
+
+<a href="https://www.kernel.org/doc/Documentation/networking/tuntap.txt" >Documentation/networking/tuntap.txt</a></em></p>
+</li>
+<li>
+<p><em>
+
+
+
+
+
+
+
+
+<a href="https://github.com/torvalds/linux/blob/v4.4/drivers/net/tun.c" >net/tun.c</a></em></p>
+</li>
+<li>
+<p><em>
+
+
+
+
+
+
+
+
+<a href="https://zhuanlan.zhihu.com/p/462501573" >云原生虚拟化：一文读懂网络虚拟化之 tun/tap 网络设备</a></em></p>
+</li>
+</ul>
+
+      ]]></content></entry><entry><title>Self-hosting services using the nginx ssl proxy</title><id>/post/0005/</id><link href="/post/0005/" rel="alternate" type="text/html"/><updated>2023-08-07T02:57:10Z</updated><published>2023-08-07T02:57:10Z</published><description>该图片由 Pete Linforth 在 Pixabay 上发布
 结构图 基础点 容器可以加入同一个网络中，并相互通过容器名通信 expect 可以用脚本自动化控制命令行下程序与用户的交互 步骤 1. 生成自签名证书 openssl req -x509 -newkey …</description><content type="html"><![CDATA[
         <p>该图片由 Pete Linforth 在 Pixabay 上<a href="https://pixabay.com/zh/illustrations/cyber-security-information-security-3400657/">发布</a></p>
 <h2 id="结构图">结构图</h2>
