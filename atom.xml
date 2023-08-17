@@ -1,4 +1,118 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-08-10T01:54:51Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>Intro to Tun/Tap</title><id>/post/0006/</id><link href="/post/0006/" rel="alternate" type="text/html"/><updated>2023-08-10T01:54:51Z</updated><published>2023-08-10T01:54:51Z</published><description>该图片由 Simon Oberthaler 在 Pixabay 上 发布
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-08-17T03:04:38Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>CMake components - use Doxygen</title><id>/post/0007/</id><link href="/post/0007/" rel="alternate" type="text/html"/><updated>2023-08-17T03:04:38Z</updated><published>2023-08-17T03:04:38Z</published><description>该图片由 Raka C. 在 Pixabay 上发布
+Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 根据需要修改 Doxyfile.in 里的选项
+# Project related configuration …</description><content type="html"><![CDATA[
+        <p>该图片由 Raka C. 在 Pixabay 上<a href="https://pixabay.com/zh/illustrations/dam-floodgate-stop-gates-8176005/">发布</a></p>
+<h2 id="doxygen-使用流程">Doxygen 使用流程</h2>
+<h3 id="1-生成配置">1. 生成配置</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ doxygen -g Doxyfile.in
+</span></span></code></pre></div><h3 id="2-修改配置">2. 修改配置</h3>
+<p>根据需要修改 Doxyfile.in 里的选项</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># Project related configuration options</span>
+</span></span><span class="line"><span class="cl"><span class="nv">DOXYFILE_ENCODING</span>      <span class="o">=</span> UTF-8
+</span></span><span class="line"><span class="cl"><span class="nv">PROJECT_NAME</span>           <span class="o">=</span> <span class="s2">&#34;My Project&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">PROJECT_NUMBER</span>         <span class="o">=</span> v0.1.0
+</span></span><span class="line"><span class="cl"><span class="nv">PROJECT_BRIEF</span>          <span class="o">=</span> <span class="s2">&#34;a research project&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nv">PROJECT_LOGO</span>           <span class="o">=</span>
+</span></span><span class="line"><span class="cl"><span class="nv">OUTPUT_DIRECTORY</span>       <span class="o">=</span> doc/
+</span></span><span class="line"><span class="cl"><span class="nv">ALLOW_UNICODE_NAMES</span>    <span class="o">=</span> NO
+</span></span><span class="line"><span class="cl"><span class="nv">OUTPUT_LANGUAGE</span>        <span class="o">=</span> English
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">OPTIMIZE_OUTPUT_FOR_C</span>  <span class="o">=</span> YES
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Configuration options related to the input files</span>
+</span></span><span class="line"><span class="cl"><span class="nv">INPUT</span>                  <span class="o">=</span> @PROJECT_SOURCE_DIR@
+</span></span><span class="line"><span class="cl"><span class="nv">RECURSIVE</span>              <span class="o">=</span> YES 
+</span></span><span class="line"><span class="cl"><span class="nv">EXCLUDE</span>                <span class="o">=</span> @PROJECT_SOURCE_DIR@/etc @PROJECT_SOURCE_DIR@/build 
+</span></span><span class="line"><span class="cl"><span class="nv">USE_MDFILE_AS_MAINPAGE</span> <span class="o">=</span> @PROJECT_SOURCE_DIR@/README.md
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Configuration options related to the LaTeX output</span>
+</span></span><span class="line"><span class="cl"><span class="nv">GENERATE_LATEX</span>         <span class="o">=</span> NO
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Configuration options related to the HTML output</span>
+</span></span><span class="line"><span class="cl"><span class="nv">GENERATE_TREEVIEW</span>      <span class="o">=</span> YES
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Configuration options related to diagram generator tools</span>
+</span></span><span class="line"><span class="cl"><span class="nv">HAVE_DOT</span>               <span class="o">=</span> YES
+</span></span><span class="line"><span class="cl"><span class="nv">CALL_GRAPH</span>             <span class="o">=</span> YES
+</span></span><span class="line"><span class="cl"><span class="nv">CALLER_GRAPH</span>           <span class="o">=</span> YES
+</span></span><span class="line"><span class="cl"><span class="nv">DOT_IMAGE_FORMAT</span>       <span class="o">=</span> svg
+</span></span><span class="line"><span class="cl"><span class="nv">INTERACTIVE_SVG</span>        <span class="o">=</span> YES
+</span></span></code></pre></div><h3 id="3-集成到-cmake">3. 集成到 CMake</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cmake" data-lang="cmake"><span class="line"><span class="cl"><span class="c"># doxygen.cmake
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">find_package</span> <span class="p">(</span><span class="s">Doxygen</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">if</span> <span class="p">(</span><span class="s">DOXYGEN_FOUND</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>        <span class="nb">message</span><span class="p">(</span><span class="s2">&#34;-- -- Create and Install the HTML based API document&#34;</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>        <span class="nb">set</span><span class="p">(</span><span class="s">DOXYFILE_IN</span> <span class="o">${</span><span class="nv">PROJECT_SOURCE_DIR</span><span class="o">}</span><span class="s">/Doxyfile.in</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>        <span class="nb">set</span><span class="p">(</span><span class="s">DOXYFILE</span>    <span class="o">${</span><span class="nv">PROJECT_BINARY_DIR</span><span class="o">}</span><span class="s">/Doxyfile</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>        <span class="nb">configure_file</span> <span class="p">(</span><span class="o">${</span><span class="nv">DOXYFILE_IN</span><span class="o">}</span> <span class="o">${</span><span class="nv">DOXYFILE</span><span class="o">}</span> <span class="s">@ONLY</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>        <span class="c"># make doc
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>        <span class="nb">add_custom_target</span> <span class="p">(</span><span class="s">doc</span> <span class="c"># ALL 
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>                    <span class="s">COMMAND</span> <span class="o">${</span><span class="nv">DOXYGEN_EXECUTABLE</span><span class="o">}</span> <span class="o">${</span><span class="nv">DOXYFILE</span><span class="o">}</span>
+</span></span><span class="line"><span class="cl">                    <span class="s">WORKING_DIRECTORY</span> <span class="o">${</span><span class="nv">PROJECT_BINARY_DIR</span><span class="o">}</span>
+</span></span><span class="line"><span class="cl">                    <span class="s">COMMENT</span> <span class="s2">&#34;Generate docs using Doxygen&#34;</span> <span class="s">VERBATIM</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">endif</span> <span class="p">()</span><span class="err">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cmake" data-lang="cmake"><span class="line"><span class="cl"><span class="c"># CMakeLists.txt
+</span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">include</span><span class="p">(</span><span class="s">doxygen.cmake</span><span class="p">)</span><span class="err">
+</span></span></span></code></pre></div><h3 id="4-doxygen-注释风格">4. Doxygen 注释风格</h3>
+<ul>
+<li>
+<p>详细描述</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * ... text ...
+</span></span></span><span class="line"><span class="cl"><span class="cm"> */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">or</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/************************************************
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *  ... text
+</span></span></span><span class="line"><span class="cl"><span class="cm"> ***********************************************/</span>
+</span></span></code></pre></div></li>
+<li>
+<p>简要描述</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/*! \brief Brief description.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *         Brief description continued.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *  Detailed description starts here.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">or</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">/// Brief description.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cm">/** Detailed description. */</span>
+</span></span></code></pre></div></li>
+<li>
+<p>函数内描述</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">var</span><span class="p">;</span> <span class="cm">/**&lt; Detailed description after the member */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">var</span><span class="p">;</span> <span class="c1">//!&lt; Brief description after the member
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">foo</span><span class="p">(</span><span class="kt">int</span> <span class="n">v</span> <span class="cm">/**&lt; [in] docs for input parameter v. */</span><span class="p">);</span>
+</span></span></code></pre></div></li>
+</ul>
+<h2 id="效果">效果</h2>
+<p>找个 CMake 项目试一下吧。<code>make doc</code> 在 12 线程机器上跑了 3min，算是无缝接入，效果还行。</p>
+<p>
+
+
+
+
+
+
+<img src="https://pic.imgdb.cn/item/64ddfb5d661c6c8e54ee0abf.png" alt=""  /></p>
+<h2 id="参考">参考</h2>
+<ul>
+<li><em><a href="https://www.doxygen.nl/manual/doxygen_usage.html">doxygen - Usage</a></em></li>
+<li><em><a href="https://www.doxygen.nl/manual/config.html">doxygen - Configuration</a></em></li>
+<li><em><a href="https://www.doxygen.nl/manual/docblocks.html">doxygen - Documenting the code</a></em></li>
+<li><em><a href="https://www.cnblogs.com/the-capricornus/p/4717566.html">cmake - configure_file</a></em></li>
+</ul>
+
+      ]]></content></entry><entry><title>Intro to Tun/Tap</title><id>/post/0006/</id><link href="/post/0006/" rel="alternate" type="text/html"/><updated>2023-08-10T01:54:51Z</updated><published>2023-08-10T01:54:51Z</published><description>该图片由 Simon Oberthaler 在 Pixabay 上 发布
 原理 +---------------+ +---------------+ +---------------+ | application A | | application B | | …</description><content type="html"><![CDATA[
         <p>该图片由 Simon Oberthaler 在 Pixabay 上
 
@@ -269,7 +383,7 @@
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">ngx/certs:/usr/local/nginx/certs</span><span class="w"> </span><span class="c"># 存放步骤1 pem 证书</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">ngx/conf:/usr/local/nginx/conf  </span><span class="w"> </span><span class="c"># 存放步骤2 conf 文件</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">ngx/sbin:/usr/local/nginx/sbin  </span><span class="w"> </span><span class="c"># 存放步骤2 expect 脚本</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">ngx/sbin:/usr/local/nginx/sbin  </span><span class="w"> </span><span class="c"># 存放步骤3 expect 脚本</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="m">11443</span><span class="p">:</span><span class="m">11443</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">tty</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
@@ -277,7 +391,7 @@
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ docker compose up -d
 </span></span><span class="line"><span class="cl">$ docker <span class="nb">exec</span> -it nginx-proxy expect pem.expect
 </span></span></code></pre></div><h2 id="总结">总结</h2>
-<p>容器隔离了环境，复杂度转移到了部署层面上。以上查了不少资料，在弄完成功 https 访问的时候居然产生了谜一般的成就感，有点离谱了……</p>
+<p>容器隔离了环境，复杂度转移到了部署层面上。以上在查了不少资料后，成功使用 https 访问时居然产生了谜一般的成就感，有点离谱了……</p>
 
       ]]></content></entry><entry><title>Solve Common Memory Problems Using Dynamic Analysis Tools</title><id>/post/0004/</id><link href="/post/0004/" rel="alternate" type="text/html"/><updated>2023-08-06T07:52:05Z</updated><published>2023-08-06T07:52:05Z</published><description>该图片由 Jürgen 在 Pixabay 上 发布
 c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，asan 比 valgrind 更快，结果更精确，经过 time 测试，asan 消耗时间是 valgrind 的 1/30。 …</description><content type="html"><![CDATA[
@@ -674,7 +788,7 @@ Server …</description><content type="html"><![CDATA[
 <blockquote>
 <p>太多的资讯就如同太少的资讯一样，都是一种对理解力的阻碍。换句话说，现代的媒体正以压倒性的泛滥资讯阻碍了我们的理解力。</p>
 </blockquote>
-<p>计算机行业各种应用术语、互联网的黑话,也是一种对理解力的障碍。用术语扯上半小时的事情，可能用大白话五分钟就能说清。在太多的信息面前没有分析消化，反而将术语当作虎皮大衣，是一种对自身理解力的放弃。</p>
+<p>计算机行业各种应用术语、互联网的黑话,也是一种对理解力的障碍。用术语扯上半小时的事情，可能用大白话五分钟就能说清。在太多的信息面前没有分析消化，将术语当作虎皮大衣，或许是一种对自身理解力的放弃。</p>
 <blockquote>
 <p>电视观众、收音机听众、杂志读者所面对的是一种复杂的组成——从独创的华丽辞藻到经过审慎挑选的资料与统计——目的都在让人不需要面对困难或努力，很容易就整理出“自己”的思绪。但是这些精美包装的资讯效率实在太高了，让观众、听众或读者根本用不着自己做结论。相反的，他们直接将包装过后的观点装进自己的脑海中，就像录影机愿意接受录影带一样自然。他只要按一个“倒带”的钮，就能找到他所需要的适当言论。</p>
 </blockquote>
