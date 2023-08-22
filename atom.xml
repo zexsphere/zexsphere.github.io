@@ -290,7 +290,7 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 </ul>
 
       ]]></content></entry><entry><title>Self-hosting services using the nginx ssl proxy</title><id>/post/0005/</id><link href="/post/0005/" rel="alternate" type="text/html"/><updated>2023-08-07T02:57:10Z</updated><published>2023-08-07T02:57:10Z</published><description>该图片由 Pete Linforth 在 Pixabay 上发布
-结构图 基础点 容器可以加入同一个网络中，并相互通过容器名通信 expect 可以用脚本自动化控制命令行下程序与用户的交互 步骤 1. 生成自签名证书 openssl req -x509 -newkey …</description><content type="html"><![CDATA[
+结构图 基础点 容器可以加入同一个网络中，并相互通过容器名通信 可以用 expect 脚本自动化控制命令行下程序与用户的交互 步骤 1. 生成自签名证书 openssl req -x509 -newkey …</description><content type="html"><![CDATA[
         <p>该图片由 Pete Linforth 在 Pixabay 上<a href="https://pixabay.com/zh/illustrations/cyber-security-information-security-3400657/">发布</a></p>
 <h2 id="结构图">结构图</h2>
 <p>
@@ -304,7 +304,7 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 <h2 id="基础点">基础点</h2>
 <ol>
 <li>容器可以加入同一个网络中，并相互通过容器名通信</li>
-<li>expect 可以用脚本自动化控制命令行下程序与用户的交互</li>
+<li>可以用 expect 脚本自动化控制命令行下程序与用户的交互</li>
 </ol>
 <h2 id="步骤">步骤</h2>
 <h3 id="1-生成自签名证书">1. 生成自签名证书</h3>
@@ -621,7 +621,13 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 
 <a href="https://github.com/ohmyzsh/ohmyzsh" >配置 ohmyzsh</a></li>
 </ul>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># ~/.zshrc</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 安装zsh-autosuggestions 自动补全</span>
+</span></span><span class="line"><span class="cl">$ <span class="nb">cd</span> ~/.oh-my-zsh/plugins/
+</span></span><span class="line"><span class="cl">$ git clone https://github.com/zsh-users/zsh-autosuggestions
+</span></span><span class="line"><span class="cl">$ <span class="nb">cd</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">$ vim ~/.zshrc
+</span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="nv">plugins</span><span class="o">=(</span>
 </span></span><span class="line"><span class="cl">	git                  <span class="c1"># git 命令缩写</span>
 </span></span><span class="line"><span class="cl">	zsh-autosuggestions  <span class="c1"># 命令行补全</span>
@@ -629,7 +635,6 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 </span></span><span class="line"><span class="cl">	<span class="c1"># ... https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="o">)</span>
-</span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># 不要忘了 source ～/.zshrc 让配置生效</span>
 </span></span></code></pre></div><h3 id="终端复用---tmuxhttpsgithubcomtmuxtmux">终端复用 - 
 
@@ -671,13 +676,37 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 </span></span><span class="line"><span class="cl"><span class="nb">set</span> -g default-command /bin/zsh
 </span></span><span class="line"><span class="cl">:wq
 </span></span></code></pre></div><h3 id="垃圾回收---trash-cli">垃圾回收 - trash-cli</h3>
-<p>单纯防止误删文件导致不必要的麻烦</p>
+<p>单纯防止误删文件导致不必要的麻烦。</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 安装</span>
 </span></span><span class="line"><span class="cl">$ sudo pacman -S trash-cli
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># 配置~/.zshrc</span>
 </span></span><span class="line"><span class="cl"><span class="nb">alias</span> <span class="nv">rm</span><span class="o">=</span><span class="s2">&#34;trash&#34;</span>
 </span></span><span class="line"><span class="cl"><span class="nb">alias</span> <span class="nv">rr</span><span class="o">=</span><span class="s2">&#34;trash-restore&#34;</span>
+</span></span></code></pre></div><h3 id="远程连接---ssh-keygen">远程连接 - ssh-keygen</h3>
+<p>一次次输入密码连接服务器也是让人头疼的事情。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 生成 ecs ecs.pub</span>
+</span></span><span class="line"><span class="cl">$ ssh-keygen -t rsa -f ecs
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 本地私钥配置</span>
+</span></span><span class="line"><span class="cl">$ vim ~/.ssh/config
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Host ecs
+</span></span><span class="line"><span class="cl">    HostName xx.xx.xx.xx
+</span></span><span class="line"><span class="cl">    User user-name
+</span></span><span class="line"><span class="cl">        IdentityFile ~/.ssh/server/ecs
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">Host ecs2
+</span></span><span class="line"><span class="cl">    HostName xx.xx.xx.xx
+</span></span><span class="line"><span class="cl">    User user-name
+</span></span><span class="line"><span class="cl">        IdentityFile ~/.ssh/server/ecs2
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 服务器公钥配置</span>
+</span></span><span class="line"><span class="cl">$ <span class="nb">cd</span> ~/.ssh/
+</span></span><span class="line"><span class="cl">$ cat ecs.pub &gt;&gt; authorized_keys
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 连接</span>
+</span></span><span class="line"><span class="cl">$ ssh ecs
 </span></span></code></pre></div><h2 id="参考">参考</h2>
 <ul>
 <li><em>

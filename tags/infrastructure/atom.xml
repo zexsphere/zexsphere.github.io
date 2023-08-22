@@ -7,7 +7,7 @@
 根据需要编写 vimscript
 Slow is Smooth, and Smooth is Fast.
 交互式shell - zsh zsh 功能很强大，最基础的命令行历史补全，解脱重复工作。
-配置 ohmyzsh # ~/.zshrc plugins=( git # git 命令缩写 zsh-autosuggestions # 命令行补全 # ... https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins ) # 不要忘了 source ～/.</description></item><item><title>SVN Command Line Usage With Docker</title><link>/post/0002/</link><pubDate>Sat, 05 Aug 2023 08:22:28 +0800</pubDate><guid>/post/0002/</guid><description>该图片由 Gerd Altmann 在 Pixabay 上发布
+配置 ohmyzsh # 安装zsh-autosuggestions 自动补全 $ cd ~/.oh-my-zsh/plugins/ $ git clone https://github.com/zsh-users/zsh-autosuggestions $ cd $ vim ~/.</description></item><item><title>SVN Command Line Usage With Docker</title><link>/post/0002/</link><pubDate>Sat, 05 Aug 2023 08:22:28 +0800</pubDate><guid>/post/0002/</guid><description>该图片由 Gerd Altmann 在 Pixabay 上发布
 Self-Hosted SVN 服务属于 IO 密集型任务。相比于 Git，更适合于频繁进行大型二进制文件的存取。且内存占用极低，从自搭建情况看，一般在 3MB 左右，峰值传输 20MB 左右。
 Server with docker 安装服务 docker compose up -d # docker-compose.yaml version: &amp;#39;3.3&amp;#39; services: svn-server: image: garethflowers/svn-server container_name: svn-server volumes: - &amp;#39;/svn:/var/opt/svn&amp;#39; ports: - &amp;#39;3690:3690&amp;#39; 生成仓库 docker exec -it svn-server svnadmin create repo
 配置仓库账户文件 位于 ^/repo/conf/{svnserver.conf passwd authz}

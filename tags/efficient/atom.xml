@@ -7,4 +7,4 @@
 根据需要编写 vimscript
 Slow is Smooth, and Smooth is Fast.
 交互式shell - zsh zsh 功能很强大，最基础的命令行历史补全，解脱重复工作。
-配置 ohmyzsh # ~/.zshrc plugins=( git # git 命令缩写 zsh-autosuggestions # 命令行补全 # ... https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins ) # 不要忘了 source ～/.</description></item></channel></rss>
+配置 ohmyzsh # 安装zsh-autosuggestions 自动补全 $ cd ~/.oh-my-zsh/plugins/ $ git clone https://github.com/zsh-users/zsh-autosuggestions $ cd $ vim ~/.</description></item></channel></rss>
