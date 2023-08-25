@@ -13,14 +13,18 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 </span></span><span class="line"><span class="cl"><span class="nv">PROJECT_NUMBER</span>         <span class="o">=</span> v0.1.0
 </span></span><span class="line"><span class="cl"><span class="nv">PROJECT_BRIEF</span>          <span class="o">=</span> <span class="s2">&#34;a research project&#34;</span>
 </span></span><span class="line"><span class="cl"><span class="nv">PROJECT_LOGO</span>           <span class="o">=</span>
-</span></span><span class="line"><span class="cl"><span class="nv">OUTPUT_DIRECTORY</span>       <span class="o">=</span> doc/
+</span></span><span class="line"><span class="cl"><span class="nv">OUTPUT_DIRECTORY</span>       <span class="o">=</span> doc
 </span></span><span class="line"><span class="cl"><span class="nv">ALLOW_UNICODE_NAMES</span>    <span class="o">=</span> NO
 </span></span><span class="line"><span class="cl"><span class="nv">OUTPUT_LANGUAGE</span>        <span class="o">=</span> English
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="nv">OPTIMIZE_OUTPUT_FOR_C</span>  <span class="o">=</span> YES
 </span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Build related configuration options</span>
+</span></span><span class="line"><span class="cl"><span class="nv">EXTRACT_ALL</span>            <span class="o">=</span> YES
+</span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># Configuration options related to the input files</span>
 </span></span><span class="line"><span class="cl"><span class="nv">INPUT</span>                  <span class="o">=</span> @PROJECT_SOURCE_DIR@
+</span></span><span class="line"><span class="cl"><span class="nv">FILE_PATTERNS</span>          <span class="o">=</span> *.c *.h
 </span></span><span class="line"><span class="cl"><span class="nv">RECURSIVE</span>              <span class="o">=</span> YES 
 </span></span><span class="line"><span class="cl"><span class="nv">EXCLUDE</span>                <span class="o">=</span> @PROJECT_SOURCE_DIR@/etc @PROJECT_SOURCE_DIR@/build 
 </span></span><span class="line"><span class="cl"><span class="nv">USE_MDFILE_AS_MAINPAGE</span> <span class="o">=</span> @PROJECT_SOURCE_DIR@/README.md
@@ -33,6 +37,7 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># Configuration options related to diagram generator tools</span>
 </span></span><span class="line"><span class="cl"><span class="nv">HAVE_DOT</span>               <span class="o">=</span> YES
+</span></span><span class="line"><span class="cl"><span class="nv">UML_LOOK</span>               <span class="o">=</span> YES
 </span></span><span class="line"><span class="cl"><span class="nv">CALL_GRAPH</span>             <span class="o">=</span> YES
 </span></span><span class="line"><span class="cl"><span class="nv">CALLER_GRAPH</span>           <span class="o">=</span> YES
 </span></span><span class="line"><span class="cl"><span class="nv">DOT_IMAGE_FORMAT</span>       <span class="o">=</span> svg
@@ -59,6 +64,7 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 </span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">include</span><span class="p">(</span><span class="s">doxygen.cmake</span><span class="p">)</span><span class="err">
 </span></span></span></code></pre></div><h3 id="4-doxygen-注释风格">4. Doxygen 注释风格</h3>
+<p>Doxygen 支持多种评论风格，因此可以不断尝试，直到找到自己喜欢的一种。</p>
 <ul>
 <li>
 <p>详细描述</p>
@@ -95,7 +101,7 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 </span></span></code></pre></div></li>
 </ul>
 <h2 id="效果">效果</h2>
-<p>找个 CMake 项目试一下吧。<code>make doc</code> 在 12 线程机器上跑了 3min，算是无缝接入，效果还行。</p>
+<p>找个 CMake 项目试一下吧。</p>
 <p>
 
 
@@ -707,7 +713,41 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># 连接</span>
 </span></span><span class="line"><span class="cl">$ ssh ecs
-</span></span></code></pre></div><h2 id="参考">参考</h2>
+</span></span></code></pre></div><h3 id="keyboard-shortcuts">Keyboard Shortcuts</h3>
+<p>自从脱离鼠标后，鼠标手以及颈椎疼痛慢慢消失了。日常大部分时间都在下面两个应用里，多用用快捷键对健康还是有好处的（通过触摸屏操作指针去&quot;够&quot;某个目标，次数多了，也是比较累的）。</p>
+<ul>
+<li>
+
+
+
+
+
+
+
+
+<a href="https://support.google.com/chrome/answer/157179" >chrome 键盘快捷键</a></li>
+<li>
+
+
+
+
+
+
+
+
+<a href="https://code.visualstudio.com/docs/getstarted/keybindings#_keyboard-shortcuts-reference" >vscode 键盘快捷键</a></li>
+</ul>
+<p>vscode 还贴心地给出了打印版的 一页
+
+
+
+
+
+
+
+
+<a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf" >pdf</a></p>
+<h2 id="参考">参考</h2>
 <ul>
 <li><em>
 
