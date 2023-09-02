@@ -21,6 +21,7 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># Build related configuration options</span>
 </span></span><span class="line"><span class="cl"><span class="nv">EXTRACT_ALL</span>            <span class="o">=</span> YES
+</span></span><span class="line"><span class="cl"><span class="nv">EXTRACT_STATIC</span>         <span class="o">=</span> YES
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># Configuration options related to the input files</span>
 </span></span><span class="line"><span class="cl"><span class="nv">INPUT</span>                  <span class="o">=</span> @PROJECT_SOURCE_DIR@
@@ -637,7 +638,7 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 </span></span><span class="line"><span class="cl"><span class="nv">plugins</span><span class="o">=(</span>
 </span></span><span class="line"><span class="cl">	git                  <span class="c1"># git 命令缩写</span>
 </span></span><span class="line"><span class="cl">	zsh-autosuggestions  <span class="c1"># 命令行补全</span>
-</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">    autojump             <span class="c1"># 快速跳转    </span>
 </span></span><span class="line"><span class="cl">	<span class="c1"># ... https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="o">)</span>
