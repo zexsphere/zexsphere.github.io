@@ -1,4 +1,109 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-08-17T03:04:38Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>CMake components - use Doxygen</title><id>/post/0007/</id><link href="/post/0007/" rel="alternate" type="text/html"/><updated>2023-08-17T03:04:38Z</updated><published>2023-08-17T03:04:38Z</published><description>该图片由 Raka C. 在 Pixabay 上发布
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-09-08T04:43:38Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>CMake components - use GTest</title><id>/post/0008/</id><link href="/post/0008/" rel="alternate" type="text/html"/><updated>2023-09-08T04:43:38Z</updated><published>2023-09-08T04:43:38Z</published><description>关于单元测试，比较关注的点
+易用，将过程专注于测试 方便，可以构造测试的前提条件，重复使用 直观，结果可视化，增强反馈 先来看 cmake 自带的测试驱动程序 ctest，ctest 当且仅当返回值为 0 时，测试成功。这样一来，ctest 框架可以容纳各种语言的测试脚本，扩展性 …</description><content type="html"><![CDATA[
+        <p>关于单元测试，比较关注的点</p>
+<ul>
+<li>易用，将过程专注于测试</li>
+<li>方便，可以构造测试的前提条件，重复使用</li>
+<li>直观，结果可视化，增强反馈</li>
+</ul>
+<p>先来看 cmake 自带的测试驱动程序 ctest，ctest 当且仅当返回值为 0 时，测试成功。这样一来，ctest 框架可以容纳各种语言的测试脚本，扩展性强。但由于一个返回条目只对应一个测试用例，因此更适合用作集成测试，用在单元测试上属于折磨人。</p>
+<p>敲定了集成测试，在单元测试上再来对比对比 cunit 和 gtest。</p>
+<h2 id="单元测试框架">单元测试框架</h2>
+<p>cunit gtest 的核心思想是一样的。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">                       +----------------------------------------------+
+</span></span><span class="line"><span class="cl">                       <span class="p">|</span> unit <span class="nb">test</span>                 +---------------+  <span class="p">|</span>
+</span></span><span class="line"><span class="cl">                       <span class="p">|</span>   +---------------+  +---&gt;+    <span class="nb">test</span> <span class="m">1</span>     <span class="p">|</span>  <span class="p">|</span>
+</span></span><span class="line"><span class="cl">                       <span class="p">|</span>   <span class="p">|</span>               <span class="p">|</span>  <span class="p">|</span>    +---------------+  <span class="p">|</span>
+</span></span><span class="line"><span class="cl">                   +------&gt;+    Suit <span class="m">1</span>     +--+            .          <span class="p">|</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>               <span class="p">|</span>  <span class="p">|</span>    +---------------+  <span class="p">|</span>
+</span></span><span class="line"><span class="cl">+----------------  <span class="p">|</span>   <span class="p">|</span>   +---------------+  +---&gt;+    <span class="nb">test</span> n     <span class="p">|</span>  <span class="p">|</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>               <span class="p">|</span>  <span class="p">|</span>   <span class="p">|</span>          .                +---------------+  <span class="p">|</span>
+</span></span><span class="line"><span class="cl"><span class="p">|</span>   Registry    +--+   +----------------------------------------------+
+</span></span><span class="line"><span class="cl"><span class="p">|</span>               <span class="p">|</span>  <span class="p">|</span>              .                +---------------+
+</span></span><span class="line"><span class="cl">+----------------  <span class="p">|</span>       +---------------+  +---&gt;+    <span class="nb">test</span> <span class="m">1</span>     <span class="p">|</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">|</span>       <span class="p">|</span>               <span class="p">|</span>  <span class="p">|</span>    +---------------+
+</span></span><span class="line"><span class="cl">                   +------&gt;+    Suit m     +--+            .
+</span></span><span class="line"><span class="cl">                           <span class="p">|</span>               <span class="p">|</span>  <span class="p">|</span>    +---------------+
+</span></span><span class="line"><span class="cl">                           +---------------+  +---&gt;+    <span class="nb">test</span> n     <span class="p">|</span>
+</span></span><span class="line"><span class="cl">                                                   +---------------+
+</span></span></code></pre></div><p>gtest 在易用性上做得更好，接口封装的很干净。支持事件机制，方便性也满足了，最后看下可视化方面。</p>
+<h2 id="可视化">可视化</h2>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 执行 gtest 程序，并输出为 xml</span>
+</span></span><span class="line"><span class="cl">$ ./a.out --gtest_output<span class="o">=</span>xml:./result.xml
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># xml 转 html</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 参考 https://gitlab.uni-koblenz.de/agrt/gtest2html readme介绍</span>
+</span></span></code></pre></div><p>可视化上 cunit 自带显示 xml 的方式，gtest 需要第三方工具转换。</p>
+<p>有一说一，cunit 输出页面风格还是很好看的。</p>
+<h2 id="集成到-cmake">集成到 CMake</h2>
+<p>cmake 版本，1.13 开始需要 c++14 的支持，1.12 需要 c++11。大多实际项目也不会盲目引进 c++14 的特性，因此，指定 1.12 一般够用了。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cmake" data-lang="cmake"><span class="line"><span class="cl"><span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CXX_STANDARD</span> <span class="s">11</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CXX_STANDARD_REQUIRED</span> <span class="s">ON</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">find_package</span><span class="p">(</span><span class="s">GTest</span> <span class="s">QUIET</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">if</span><span class="p">(</span><span class="s">NOT</span> <span class="s">GTest_FOUND</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>    <span class="nb">include</span><span class="p">(</span><span class="s">FetchContent</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>    <span class="nb">FetchContent_Declare</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="s">googletest</span>
+</span></span><span class="line"><span class="cl">        <span class="s">GIT_REPOSITORY</span> <span class="s">https://github.com/google/googletest.git</span>
+</span></span><span class="line"><span class="cl">        <span class="s">GIT_TAG</span> <span class="s">release-1.12.0</span>
+</span></span><span class="line"><span class="cl">    <span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>	<span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>	<span class="c"># FetchContent_MakeAvailable() is not suitable for here :(
+</span></span></span><span class="line"><span class="cl"><span class="c"></span>    <span class="nb">FetchContent_GetProperties</span><span class="p">(</span><span class="s">googletest</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>    <span class="nb">if</span><span class="p">(</span><span class="s">NOT</span> <span class="s">googletest_POPULATED</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>    	<span class="nb">FetchContent_Populate</span><span class="p">(</span><span class="s">googletest</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>        <span class="nb">add_subdirectory</span><span class="p">(</span><span class="o">${</span><span class="nv">googletest_SOURCE_DIR</span><span class="o">}</span> <span class="o">${</span><span class="nv">googletest_BINARY_DIR</span><span class="o">}</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span>    <span class="nb">endif</span><span class="p">()</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">endif</span><span class="p">()</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">add_executable</span><span class="p">(</span><span class="s">exec_name</span> <span class="s">exec_name.cc</span><span class="p">)</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">exec_name</span> <span class="s">gtest</span> <span class="s">gtest_main</span><span class="p">)</span><span class="err">
+</span></span></span></code></pre></div><h2 id="总结">总结</h2>
+<p>gtest 目前从我的使用角度来说，只剩下可视化这个问题了。如果 gtest 输出的 xml 支持 cunit 风格，且不需要太复杂的设置进行格式转换，就很好了。</p>
+<h2 id="参考">参考</h2>
+<ul>
+<li>
+<p><em>
+
+
+
+
+
+
+
+
+<a href="https://www.cnblogs.com/coderzh/archive/2009/04/06/1430396.html" >gtest 事件机制</a></em></p>
+</li>
+<li>
+<p><em>
+
+
+
+
+
+
+
+
+<a href="https://paul.pub/gtest-and-coverage/" >gtest 单元测试与代码覆盖率</a></em></p>
+</li>
+<li>
+<p><em>
+
+
+
+
+
+
+
+
+<a href="https://www.cnblogs.com/linux-sir/archive/2012/08/25/2654557.html" >cunit 单元测试</a></em></p>
+</li>
+</ul>
+
+      ]]></content></entry><entry><title>CMake components - use Doxygen</title><id>/post/0007/</id><link href="/post/0007/" rel="alternate" type="text/html"/><updated>2023-08-17T03:04:38Z</updated><published>2023-08-17T03:04:38Z</published><description>该图片由 Raka C. 在 Pixabay 上发布
 Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 根据需要修改 Doxyfile.in 里的选项
 # Project related configuration …</description><content type="html"><![CDATA[
         <p>该图片由 Raka C. 在 Pixabay 上<a href="https://pixabay.com/zh/illustrations/dam-floodgate-stop-gates-8176005/">发布</a></p>
@@ -695,7 +800,7 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 生成 ecs ecs.pub</span>
 </span></span><span class="line"><span class="cl">$ ssh-keygen -t rsa -f ecs
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 本地私钥配置</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 私钥配置</span>
 </span></span><span class="line"><span class="cl">$ vim ~/.ssh/config
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">Host ecs
@@ -708,12 +813,47 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 </span></span><span class="line"><span class="cl">    User user-name
 </span></span><span class="line"><span class="cl">        IdentityFile ~/.ssh/server/ecs2
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 服务器公钥配置</span>
-</span></span><span class="line"><span class="cl">$ <span class="nb">cd</span> ~/.ssh/
-</span></span><span class="line"><span class="cl">$ cat ecs.pub &gt;&gt; authorized_keys
+</span></span><span class="line"><span class="cl"><span class="c1"># ssh-copy-id 传输公钥</span>
+</span></span><span class="line"><span class="cl">$ ssh-copy-id -i ecs.pub  user-name@xx.xx.xx.xx
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># 连接</span>
 </span></span><span class="line"><span class="cl">$ ssh ecs
+</span></span></code></pre></div><h3 id="远程同步---rsync">远程同步 - rsync</h3>
+<p>配合上面的远程连接使用效果更佳</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ rsync -av <span class="nb">source</span> ecs:/code/
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># -a           递归同步文件元信息</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># -v           结果输出到终端</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># -n           模拟执行</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># --delete     目标是当前的镜像</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># --link-desk  指定基准目录增量备份</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 脚本来源 https://www.ruanyifeng.com/blog/2020/08/rsync.html</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 根据需要修改路径，还是很实用的</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#!/bin/bash</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># A script to perform incremental backups using rsync</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">set</span> -o errexit
+</span></span><span class="line"><span class="cl"><span class="nb">set</span> -o nounset
+</span></span><span class="line"><span class="cl"><span class="nb">set</span> -o pipefail
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">readonly</span> <span class="nv">SOURCE_DIR</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">HOME</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">readonly</span> <span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">&#34;/mnt/data/backups&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">readonly</span> <span class="nv">DATETIME</span><span class="o">=</span><span class="s2">&#34;</span><span class="k">$(</span>date <span class="s1">&#39;+%Y-%m-%d_%H:%M:%S&#39;</span><span class="k">)</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">readonly</span> <span class="nv">BACKUP_PATH</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">BACKUP_DIR</span><span class="si">}</span><span class="s2">/</span><span class="si">${</span><span class="nv">DATETIME</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nb">readonly</span> <span class="nv">LATEST_LINK</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">BACKUP_DIR</span><span class="si">}</span><span class="s2">/latest&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">mkdir -p <span class="s2">&#34;</span><span class="si">${</span><span class="nv">BACKUP_DIR</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">rsync -av --delete <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="s2">&#34;</span><span class="si">${</span><span class="nv">SOURCE_DIR</span><span class="si">}</span><span class="s2">/&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --link-dest <span class="s2">&#34;</span><span class="si">${</span><span class="nv">LATEST_LINK</span><span class="si">}</span><span class="s2">&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --exclude<span class="o">=</span><span class="s2">&#34;.cache&#34;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="s2">&#34;</span><span class="si">${</span><span class="nv">BACKUP_PATH</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">rm -rf <span class="s2">&#34;</span><span class="si">${</span><span class="nv">LATEST_LINK</span><span class="si">}</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">ln -s <span class="s2">&#34;</span><span class="si">${</span><span class="nv">BACKUP_PATH</span><span class="si">}</span><span class="s2">&#34;</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">LATEST_LINK</span><span class="si">}</span><span class="s2">&#34;</span>
 </span></span></code></pre></div><h3 id="keyboard-shortcuts">Keyboard Shortcuts</h3>
 <p>自从脱离鼠标后，鼠标手以及颈椎疼痛慢慢消失了。日常大部分时间都在下面两个应用里，多用用快捷键对健康还是有好处的（通过触摸屏操作指针去&quot;够&quot;某个目标，次数多了，也是比较累的）。</p>
 <ul>
