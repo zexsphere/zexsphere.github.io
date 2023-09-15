@@ -1,4 +1,170 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-09-08T04:43:38Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>CMake components - use GTest</title><id>/post/0008/</id><link href="/post/0008/" rel="alternate" type="text/html"/><updated>2023-09-08T04:43:38Z</updated><published>2023-09-08T04:43:38Z</published><description>关于单元测试，比较关注的点
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-09-15T00:43:38Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>gcc optimization</title><id>/post/0009/</id><link href="/post/0009/" rel="alternate" type="text/html"/><updated>2023-09-15T00:43:38Z</updated><published>2023-09-15T00:43:38Z</published><description>what is optimization for a program?
+run faster use less memory, or consume fewer system resources. This can involve various techniques such …</description><content type="html"><![CDATA[
+        <p>what is optimization for a program?</p>
+<ul>
+<li>run faster</li>
+<li>use less memory, or consume fewer system resources.</li>
+</ul>
+<p>This can involve various techniques such as algorithmic improvements, code restructuring, memory management, and compiler optimizations.</p>
+<p>Let&rsquo;s take a look at compiler optimizations.</p>
+<h2 id="-o">-O</h2>
+<p>You can invoke <em>GCC with -Q &ndash;help=optimizers</em> to find out the exact set of optimizations that are enabled at each level.</p>
+<ul>
+<li><code>-O&lt;level&gt;</code> The default level is 0.
+<ul>
+<li>
+<p><code>-O0</code> Reduce compilation time and make debugging produce the expected results.</p>
+</li>
+<li>
+<p><code>-O1</code> The compiler tries to reduce code size and execution time, without performing any optimizations that take a great deal of compilation time.</p>
+</li>
+<li>
+<p><code>-O2</code> Optimize even more. GCC performs nearly all supported optimizations that do not involve a space-speed tradeoff. As compared to -O, this option increases both compilation time and the performance of the generated code.</p>
+</li>
+<li>
+<p><code>-O3</code> Optimize yet more.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><code>-O&lt;level&gt;</code> turns on all optimizations specified by <code>-O&lt;level - 1&gt;</code> also turns on other optimization flags.</p>
+<ul>
+<li>
+<p><code>-Ofast</code> enables all -O3 optimizations and disregard strict standards compliance.</p>
+</li>
+<li>
+<p><code>-Og</code> Optimize debugging experience. -Og should be the optimization level of choice for the standard edit-compile-debug cycle, offering a reasonable level of optimization while maintaining fast compilation and a good debugging experience. It is a better choice than -O0 for producing debuggable code because some compiler passes that collect debug information are disabled at -O0. Like -O0, -Og completely disables a number of optimization passes so that individual options controlling them have no effect. Otherwise -Og enables all -O1 optimization flags except for those that may interfere with debugging.</p>
+</li>
+<li>
+<p><code>-Os</code> Optimize for size. -Os enables all -O2 optimizations except those that often increase code size. It also enables -finline-functions, causes the compiler to tune for code size rather than execution speed, and performs further optimizations designed to reduce code size.</p>
+</li>
+<li>
+<p><code>-Oz</code> Optimize aggressively for size rather than speed. This may increase the number of instructions executed if those instructions require fewer bytes to encode. -Oz behaves similarly to -Os including enabling most -O2 optimizations.</p>
+</li>
+</ul>
+<p>If you use multiple -O options, with or without level numbers, the last such option is the one that is effective.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-basic" data-lang="basic"><span class="line"><span class="cl"><span class="w">      </span><span class="vg">Og</span><span class="w">         </span><span class="vg">Os</span><span class="o">/</span><span class="vg">Oz</span><span class="w">               </span><span class="vg">Ofast</span><span class="w">                   </span><span class="il">1</span><span class="o">.</span><span class="w"> </span><span class="vg">Og</span><span class="w">    </span><span class="vg">for</span><span class="w"> </span><span class="vg">debug</span>
+</span></span><span class="line"><span class="cl"><span class="w">      </span><span class="o">^</span><span class="w">          </span><span class="o">^</span><span class="w">                   </span><span class="o">^</span><span class="w">                       </span><span class="il">2</span><span class="o">.</span><span class="w"> </span><span class="vg">Os</span><span class="o">/</span><span class="vg">Oz</span><span class="w"> </span><span class="vg">for</span><span class="w"> </span><span class="vg">size</span>
+</span></span><span class="line"><span class="cl"><span class="w">      </span><span class="o">|</span><span class="w">          </span><span class="o">|</span><span class="w">                   </span><span class="o">|</span><span class="w">                       </span><span class="il">3</span><span class="o">.</span><span class="w"> </span><span class="vg">Ofast</span><span class="w"> </span><span class="vg">not</span><span class="w"> </span><span class="vg">use</span>
+</span></span><span class="line"><span class="cl"><span class="o">+----------+----------+----------+------&gt;</span><span class="w"> </span><span class="vg">optimize</span><span class="w"> </span><span class="vg">level</span><span class="w">   </span><span class="o">/-----------------------</span>
+</span></span><span class="line"><span class="cl"><span class="vg">O0</span><span class="w">         </span><span class="vg">O1</span><span class="w">         </span><span class="vg">O2</span><span class="w">         </span><span class="vg">O3</span><span class="w">                        </span><span class="o">|</span><span class="w"> </span><span class="vg">O0</span><span class="w"> </span><span class="vg">for</span><span class="w"> </span><span class="vg">debug</span><span class="w"> </span><span class="vg">version</span>
+</span></span><span class="line"><span class="cl"><span class="o">&gt;----------&gt;----------&gt;----------&gt;------&gt;</span><span class="w"> </span><span class="vg">enabling</span><span class="w"> </span><span class="vg">options</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="vg">O2</span><span class="w"> </span><span class="vg">for</span><span class="w"> </span><span class="vg">release</span><span class="w"> </span><span class="vg">version</span>
+</span></span></code></pre></div><p>Thinks for 
+
+
+
+
+
+
+
+
+<a href="https://meldmerge.org/" >Meld</a>, which helps me compare the list of optimization options.</p>
+<p>Some commonly used options</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-basic" data-lang="basic"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">-</span><span class="vg">fomit</span><span class="o">-</span><span class="vg">frame</span><span class="o">-</span><span class="vg">pointer</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">...</span>
+</span></span></code></pre></div><h2 id="-g">-g</h2>
+<ul>
+<li><code>-g&lt;level&gt;</code> The default level is 2.
+<ul>
+<li>
+<p><code>-g0</code> produces no debug information at all. Thus, -g0 negates -g.</p>
+</li>
+<li>
+<p><code>-g1</code> produces minimal information, enough for making backtraces in parts of the program that you don’t plan to debug. This includes descriptions of functions and external variables, and line number tables, but no information about local variables.</p>
+</li>
+<li>
+<p><code>-g2</code> between g1 and g3. And -g2 equals -g.</p>
+</li>
+<li>
+<p><code>-g3</code> includes extra information, such as <strong>all the macro definitions</strong> present in the program. Some debuggers support macro expansion when you use -g3.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>If you use multiple -O options, with or without level numbers, the last such option is the one that is effective.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-basic" data-lang="basic"><span class="line"><span class="cl"><span class="vg">g0</span><span class="w">         </span><span class="vg">g1</span><span class="w">         </span><span class="vg">g2</span><span class="w">         </span><span class="vg">g3</span><span class="w">                        </span><span class="o">|</span><span class="w"> </span><span class="vg">g2</span><span class="w"> </span><span class="vg">for</span><span class="w"> </span><span class="vg">debug</span><span class="w"> </span><span class="vg">version</span>
+</span></span><span class="line"><span class="cl"><span class="o">&gt;----------&gt;----------&gt;----------&gt;------&gt;</span><span class="w"> </span><span class="vg">debug</span><span class="w"> </span><span class="vg">level</span><span class="w">      </span><span class="o">|</span><span class="w"> </span><span class="vg">g0</span><span class="w"> </span><span class="vg">for</span><span class="w"> </span><span class="vg">release</span><span class="w"> </span><span class="vg">version</span>
+</span></span><span class="line"><span class="cl"><span class="w">                      </span><span class="o">-</span><span class="vg">g</span>
+</span></span></code></pre></div><p>In addition, command <em>strip</em> can remove the debugging information from executable programs. As a result, the program size is reduced.</p>
+<h2 id="attributes">attributes</h2>
+<p>Some common use cases include:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-basic" data-lang="basic"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="vg">__attribute__</span><span class="w"> </span><span class="p">((</span><span class="vg">always_inline</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="vg">__attribute__</span><span class="w"> </span><span class="p">((</span><span class="vg">noreturn</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="vg">__attribute__</span><span class="w"> </span><span class="p">((</span><span class="vg">weak</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl"><span class="vg">__attribute__</span><span class="w"> </span><span class="p">((</span><span class="vg">visibility</span><span class="w"> </span><span class="p">(</span><span class="s2">&#34;hidden&#34;</span><span class="p">)))</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="vg">__attribute__</span><span class="w"> </span><span class="p">((</span><span class="vg">packed</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="o">...</span>
+</span></span></code></pre></div><p>Perhaps I should write another article to elaborate on this.</p>
+<h2 id="summary">summary</h2>
+<p>As you can see, the mechanism of GCC is quite extensive. Although many things may not be needed in daily use, it is still beneficial to have some knowledge about them.</p>
+<h2 id="refer">refer</h2>
+<ul>
+<li><em>
+
+
+
+
+
+
+
+
+<a href="https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html#Optimize-Options" >gcc optimize options</a></em></li>
+<li><em>
+
+
+
+
+
+
+
+
+<a href="https://news.ycombinator.com/item?id=23140682" >hacknews about gcc optimize level</a></em></li>
+<li><em>
+
+
+
+
+
+
+
+
+<a href="https://gcc.gnu.org/onlinedocs/gcc/Debugging-Options.html#Debugging-Options" >gcc debugging options</a></em></li>
+<li><em>Attributes of 
+
+
+
+
+
+
+
+
+<a href="https://gcc.gnu.org/onlinedocs/gcc/Function-Attributes.html" >Function</a></em> / 
+
+
+
+
+
+
+
+
+<a href="https://gcc.gnu.org/onlinedocs/gcc/Variable-Attributes.html" >Variables</a> / 
+
+
+
+
+
+
+
+
+<a href="https://gcc.gnu.org/onlinedocs/gcc/Type-Attributes.html" >Type</a></li>
+</ul>
+
+      ]]></content></entry><entry><title>CMake components - use GTest</title><id>/post/0008/</id><link href="/post/0008/" rel="alternate" type="text/html"/><updated>2023-09-08T04:43:38Z</updated><published>2023-09-08T04:43:38Z</published><description>关于单元测试，比较关注的点
 易用，将过程专注于测试 方便，可以构造测试的前提条件，重复使用 直观，结果可视化，增强反馈 先来看 cmake 自带的测试驱动程序 ctest，ctest 当且仅当返回值为 0 时，测试成功。这样一来，ctest 框架可以容纳各种语言的测试脚本，扩展性 …</description><content type="html"><![CDATA[
         <p>关于单元测试，比较关注的点</p>
 <ul>
@@ -170,42 +336,23 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 </span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">include</span><span class="p">(</span><span class="s">doxygen.cmake</span><span class="p">)</span><span class="err">
 </span></span></span></code></pre></div><h3 id="4-doxygen-注释风格">4. Doxygen 注释风格</h3>
-<p>Doxygen 支持多种评论风格，因此可以不断尝试，直到找到自己喜欢的一种。</p>
-<ul>
-<li>
-<p>详细描述</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/**
-</span></span></span><span class="line"><span class="cl"><span class="cm"> * ... text ...
-</span></span></span><span class="line"><span class="cl"><span class="cm"> */</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">or</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="cm">/************************************************
-</span></span></span><span class="line"><span class="cl"><span class="cm"> *  ... text
-</span></span></span><span class="line"><span class="cl"><span class="cm"> ***********************************************/</span>
-</span></span></code></pre></div></li>
-<li>
-<p>简要描述</p>
+<p>Doxygen 支持多种评论风格，因此可以不断尝试，直到找到自己喜欢的一种。（见参考中的 CmdExample）</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/*! \brief Brief description.
 </span></span></span><span class="line"><span class="cl"><span class="cm"> *         Brief description continued.
 </span></span></span><span class="line"><span class="cl"><span class="cm"> *
 </span></span></span><span class="line"><span class="cl"><span class="cm"> *  Detailed description starts here.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *  
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * \return status code          \n
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *          0 Success           \n 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> *         -1 Failure
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * \param[in]       w double the width of a rectangle.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * \param[in]       h double the height of a rectangle.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * \param[in, out]  area double the area of a rectangle.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * ... 
 </span></span></span><span class="line"><span class="cl"><span class="cm"> */</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">or</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">/// Brief description.
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cm">/** Detailed description. */</span>
-</span></span></code></pre></div></li>
-<li>
-<p>函数内描述</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">var</span><span class="p">;</span> <span class="cm">/**&lt; Detailed description after the member */</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="n">var</span><span class="p">;</span> <span class="c1">//!&lt; Brief description after the member
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">foo</span><span class="p">(</span><span class="kt">int</span> <span class="n">v</span> <span class="cm">/**&lt; [in] docs for input parameter v. */</span><span class="p">);</span>
-</span></span></code></pre></div></li>
-</ul>
+</span></span></code></pre></div><p>注释主要是供其他程序员理解（主要是未来的自己），不是供用户阅读的。良好的代码规范比起大量的注释来说更加友善，这一点可以多参考 nginx 等优秀代码的规范。</p>
+<p>练习注释风格不如多锻炼锻炼如何写用户手册和产品文档，这对程序员来说更有益处。</p>
 <h2 id="效果">效果</h2>
 <p>找个 CMake 项目试一下吧。</p>
 <p>
@@ -221,6 +368,7 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 <li><em><a href="https://www.doxygen.nl/manual/doxygen_usage.html">doxygen - Usage</a></em></li>
 <li><em><a href="https://www.doxygen.nl/manual/config.html">doxygen - Configuration</a></em></li>
 <li><em><a href="https://www.doxygen.nl/manual/docblocks.html">doxygen - Documenting the code</a></em></li>
+<li><em><a href="https://www.doxygen.nl/manual/commands.html#cmdexample">doxygen - CmdExample</a></em></li>
 <li><em><a href="https://www.cnblogs.com/the-capricornus/p/4717566.html">cmake - configure_file</a></em></li>
 </ul>
 
