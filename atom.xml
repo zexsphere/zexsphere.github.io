@@ -97,6 +97,7 @@ run faster use less memory, or consume fewer system resources. This can involve 
 </span></span></code></pre></div><p>Perhaps I should write another article to elaborate on this.</p>
 <h2 id="summary">summary</h2>
 <p>As you can see, the mechanism of GCC is quite extensive. Although many things may not be needed in daily use, it is still beneficial to have some knowledge about them.</p>
+<p>The optimization mechanism of GCC should be considered as a secondary means. Given the capabilities of the current machine, greater attention should be given to algorithmic improvements, code restructuring, and memory management.</p>
 <h2 id="refer">refer</h2>
 <ul>
 <li><em>
