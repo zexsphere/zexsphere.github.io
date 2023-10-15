@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Series on Zex</title><link>/series/</link><description>Recent content in Series on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><atom:link href="/series/atom.xml" rel="self" type="application/rss+xml"/><item><title/><link>/series/code/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/series/code/</guid><description>v2ex 设计了一套虚拟货币系统，货币会通过回复和感谢进行转移，它说这是关于时间的隐喻
+你在这里所做的每一件事情，都会消耗你的时间。倘若一件事情做完之后，无法得到任何有意义的回应，那么这件事情就像是白做了。如果一个人持续做那些无意义的事情，那么他实际上就是在浪费他的时间。
+系列总结 网络编程系列 这玩意儿真的有那么难吗？
+01 tcp-ip 协议栈
+02 socket api
+03 io 复用
+软件运行机制与原理系列 《程序员的自我修养——链接、装载与库》</description></item><item><title/><link>/series/life/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/series/life/</guid><description>琐碎思考 读书杂稿 老人与海</description></item><item><title>人情世故 - 始</title><link>/series/thoughts/survive/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/series/thoughts/survive/</guid><description>我在面对人情世故时，总是有着不屑的。其实脑海中对它只存在着模糊的概念，并没有详细的认识，那么不妨来研究下，它究竟是什么样的？
+这样，也就有了更充足的理由来供批判。
+这样看来，人类群体中总是存在着这样或那样的“人情世故”。或许在别的地方不那么严重，但身为人类的一员，需要谋取生存口粮时，肯定避免不了打交道。
+因此，跟形形色色的人进行沟通是大部分人面临的一道题。只要抛下了这层成见，这有限的一生或许会顺畅不少。
+当然，我也希望自己能在专业这条路上，一直生猛下去，两不干扰嘛。
+因为拒绝人情世故而直接拒绝跟别人好好沟通，傻的可爱。（你跟他好好沟通，它跟你玩人情世故，那就算了）
+参考 丑陋的中国人 丑陋的美国人 丑陋的日本人 精英的傲慢</description></item><item><title>人情世故 - 终</title><link>/series/thoughts/survive-1/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/series/thoughts/survive-1/</guid><description> 上一篇 说了关于人情世故的来源，取出其中算得上好的地方加以学习，用于自保。希望仅限于此，不要继续下去了。
+参考 丑陋的中国人 丑陋的美国人 丑陋的日本人 精英的傲慢</description></item><item><title>老人与海</title><link>/series/read/the-old-man-and-the-sea/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/series/read/the-old-man-and-the-sea/</guid><description/></item></channel></rss>

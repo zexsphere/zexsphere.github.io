@@ -1,4 +1,51 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-09-29T07:58:47Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>socket api</title><id>/post/0011/</id><link href="/post/0011/" rel="alternate" type="text/html"/><updated>2023-09-29T07:58:47Z</updated><published>2023-09-29T07:58:47Z</published><description>socket api map +--------+ (AF_INET SOCK_STREAM) | socket | AF_INET6 SOCK_DGRAM +--+-----+ setsockopt() ------ SO_REUSEADDR | | SO_RCVBUF …</description><content type="html"><![CDATA[
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US"><title>Zex</title><id>/</id><description>Recent content on Zex</description><generator>Hugo -- gohugo.io</generator><language>en</language><updated>2023-10-07T00:51:58Z</updated><link href="/atom.xml" rel="self" type="application/rss+xml"/><entry><title>io mux &amp; advanced io</title><id>/post/0012/</id><link href="/post/0012/" rel="alternate" type="text/html"/><updated>2023-10-07T00:51:58Z</updated><published>2023-10-07T00:51:58Z</published><description>Once the socket communication is established, the most frequent operation is I/O between them. This brings two issues: one is not blocking …</description><content type="html"><![CDATA[
+        <p>Once the socket communication is established, the most frequent operation is I/O between them. This brings two issues: one is not blocking on input from a specific source, and the other is how to minimize data copying between the kernel buffer and the data buffer.</p>
+<p>The former requires I/O multiplexing, and the latter requires the use of some advanced I/O functions.</p>
+<h2 id="io-mux">io mux</h2>
+<h3 id="select">select</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-basic" data-lang="basic"><span class="line"><span class="cl"><span class="o">&lt;</span><span class="vg">sys</span><span class="o">/</span><span class="vg">select</span><span class="o">.</span><span class="vg">h</span><span class="o">&gt;</span><span class="w">                </span><span class="vg">FD_ZERO</span><span class="w">         </span><span class="vg">select</span>
+</span></span><span class="line"><span class="cl"><span class="w">                              </span><span class="vg">FD_SET</span><span class="w">    </span><span class="o">+---&gt;</span><span class="w"> </span><span class="p">(</span><span class="vg">int</span><span class="w">      </span><span class="p">,</span><span class="w"> </span><span class="o">+-&gt;</span><span class="w"> </span><span class="vg">fd</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="il">1</span>
+</span></span><span class="line"><span class="cl"><span class="w"> </span><span class="vg">fd_set</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="il">1024</span><span class="w"> </span><span class="vg">bit</span><span class="w">            </span><span class="vg">FD_CLR</span><span class="w">           </span><span class="vg">fd_set</span><span class="o">*</span><span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="o">|-&gt;</span><span class="w"> </span><span class="vg">read</span><span class="w">       </span><span class="vg">fd_set</span>
+</span></span><span class="line"><span class="cl"><span class="o">+-------------------------------------+</span><span class="w">        </span><span class="vg">fd_set</span><span class="o">*</span><span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="o">|-&gt;</span><span class="w"> </span><span class="vg">write</span><span class="w">      </span><span class="vg">fd_set</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span><span class="il">0</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">.</span><span class="w"> </span><span class="o">.|</span><span class="w">        </span><span class="vg">fd_set</span><span class="o">*</span><span class="w">  </span><span class="p">,</span><span class="w"> </span><span class="o">|-&gt;</span><span class="w"> </span><span class="vg">exceptions</span><span class="w"> </span><span class="vg">fd_set</span>
+</span></span><span class="line"><span class="cl"><span class="o">+-------------------------------------+</span><span class="w">        </span><span class="vg">timeval</span><span class="o">*</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="o">+-&gt;</span><span class="w"> </span><span class="vg">timeout</span><span class="w">  </span><span class="vg">usually</span><span class="w"> </span><span class="vg">NULL</span>
+</span></span><span class="line"><span class="cl"><span class="w">                              </span><span class="vg">FD_ISSET</span><span class="w">  </span><span class="o">&lt;---+</span><span class="w"> </span><span class="p">);</span>
+</span></span></code></pre></div><p>fd starts from 0, so nfds needs to be increased by 1.</p>
+<p>after each call to <code>select</code>, it will clear the fds, and need to rejoin it!</p>
+<p>thus, <code>select</code> is suitable for detecting only one socket fd. for more, we need <code>poll</code>.</p>
+<p>by the way, fd_set is an example of bitmap.</p>
+<h3 id="poll">poll</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-basic" data-lang="basic"><span class="line"><span class="cl"><span class="o">&lt;</span><span class="vg">sys</span><span class="o">/</span><span class="vg">poll</span><span class="o">.</span><span class="vg">h</span><span class="o">&gt;</span><span class="w">                  </span><span class="vg">poll</span><span class="p">(</span><span class="vg">struct</span><span class="w"> </span><span class="vg">pollfd</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="vg">unsigned</span><span class="w"> </span><span class="vg">long</span><span class="w"> </span><span class="vg">nfds</span><span class="p">,</span><span class="w"> </span><span class="vg">int</span><span class="w"> </span><span class="vg">timeout</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="w"> </span><span class="vg">struct</span><span class="w"> </span><span class="vg">pollfd</span><span class="w"> </span><span class="p">{</span><span class="w">                        </span><span class="vg">array</span><span class="w">            </span><span class="vg">array</span><span class="w"> </span><span class="vg">index</span><span class="w">       </span><span class="vg">INFTIM</span>
+</span></span><span class="line"><span class="cl"><span class="w">     </span><span class="vg">int</span><span class="w">   </span><span class="vg">fd</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="w">     </span><span class="vg">short</span><span class="w"> </span><span class="vg">events</span><span class="p">;</span><span class="w">  </span><span class="o">&lt;---+</span><span class="w"> </span><span class="vg">register</span><span class="w">                    </span><span class="vg">no</span><span class="w"> </span><span class="vg">limited</span><span class="w"> </span><span class="vg">to</span><span class="w"> </span><span class="il">1024</span>
+</span></span><span class="line"><span class="cl"><span class="w">     </span><span class="vg">short</span><span class="w"> </span><span class="vg">revents</span><span class="p">;</span><span class="w"> </span><span class="o">+---&gt;</span><span class="w">  </span><span class="vg">detect</span>
+</span></span><span class="line"><span class="cl"><span class="w"> </span><span class="p">};</span>
+</span></span></code></pre></div><h3 id="epoll">epoll</h3>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-basic" data-lang="basic"><span class="line"><span class="cl"><span class="o">&lt;</span><span class="vg">sys</span><span class="o">/</span><span class="vg">epoll</span><span class="o">.</span><span class="vg">h</span><span class="o">&gt;</span><span class="w">             </span><span class="o">+</span><span class="w"> </span><span class="vg">int</span><span class="w"> </span><span class="vg">epoll_create</span><span class="w"> </span><span class="p">(</span><span class="vg">int</span><span class="w"> </span><span class="vg">size</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="vg">struct</span><span class="w"> </span><span class="vg">epoll_event</span><span class="w">        </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span><span class="w">                         </span><span class="o">|</span><span class="w">                                  </span><span class="vg">EPOLL_CTL_ADD</span><span class="w"> </span><span class="il">1</span>
+</span></span><span class="line"><span class="cl"><span class="w">  </span><span class="vg">uint32_t</span><span class="w">     </span><span class="vg">events</span><span class="p">;</span><span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="vg">event</span><span class="o">.</span><span class="vg">events</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="vg">EPOLLET</span><span class="p">;</span><span class="w">    </span><span class="o">+&gt;</span><span class="w">  </span><span class="vg">EPOLL_CTL_DEL</span><span class="w"> </span><span class="il">2</span>
+</span></span><span class="line"><span class="cl"><span class="w">  </span><span class="vg">epoll_data_t</span><span class="w"> </span><span class="vg">data</span><span class="p">;</span><span class="w">      </span><span class="o">|</span><span class="w">                              </span><span class="o">|</span><span class="w">   </span><span class="vg">EPOLL_CTL_MOD</span><span class="w"> </span><span class="il">3</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span><span class="w">                        </span><span class="o">|</span><span class="w">                              </span><span class="o">+</span>
+</span></span><span class="line"><span class="cl"><span class="w">                          </span><span class="o">|</span><span class="w"> </span><span class="vg">int</span><span class="w"> </span><span class="vg">epoll_ctl</span><span class="w"> </span><span class="p">(</span><span class="vg">int</span><span class="w"> </span><span class="vg">epfd</span><span class="p">,</span><span class="w"> </span><span class="vg">int</span><span class="w"> </span><span class="vg">op</span><span class="p">,</span><span class="w"> </span><span class="vg">int</span><span class="w"> </span><span class="vg">fd</span><span class="p">,</span><span class="vg">struct</span><span class="w"> </span><span class="vg">epoll_event</span><span class="w"> </span><span class="o">*</span><span class="vg">event</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="vg">struct</span><span class="w"> </span><span class="vg">epoll_event</span><span class="w"> </span><span class="vg">event</span><span class="p">;</span><span class="w"> </span><span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="vg">event</span><span class="o">.</span><span class="vg">data</span><span class="o">.</span><span class="vg">fd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="vg">fd</span><span class="p">;</span><span class="w">       </span><span class="o">|</span><span class="w"> </span><span class="vg">int</span><span class="w"> </span><span class="vg">epoll_wait</span><span class="w"> </span><span class="p">(</span><span class="vg">int</span><span class="w"> </span><span class="vg">epfd</span><span class="p">,</span><span class="w"> </span><span class="vg">struct</span><span class="w"> </span><span class="vg">epoll_event</span><span class="w"> </span><span class="o">*</span><span class="vg">events</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="vg">event</span><span class="o">.</span><span class="vg">events</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="vg">EPOLLIN</span><span class="p">;</span><span class="w">   </span><span class="o">+</span><span class="w">                                   </span><span class="vg">int</span><span class="w"> </span><span class="vg">maxevents</span><span class="p">,</span><span class="w"> </span><span class="vg">int</span><span class="w"> </span><span class="vg">timeout</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="o">/------------+</span>
+</span></span><span class="line"><span class="cl"><span class="vg">in</span><span class="w"> </span><span class="vg">case</span><span class="w">       </span><span class="vg">socket_fd</span><span class="o">-</span><span class="w">       </span><span class="vg">threads</span><span class="w">       </span><span class="vg">we</span><span class="w"> </span><span class="vg">need</span><span class="w"> </span><span class="vg">EPOLLONESHOT</span>
+</span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="o">\------------+</span>
+</span></span></code></pre></div><h3 id="compare">compare</h3>
+<h2 id="advanced-io">advanced io</h2>
+<h2 id="refer">refer</h2>
+<ul>
+<li><em>High Performance Linux Service Programming - chapter 9</em></li>
+<li><em>unpv1: the sockets networking api- chapter 6</em></li>
+</ul>
+
+      ]]></content></entry><entry><title>Socket api</title><id>/post/0011/</id><link href="/post/0011/" rel="alternate" type="text/html"/><updated>2023-09-29T07:58:47Z</updated><published>2023-09-29T07:58:47Z</published><description>socket api map +--------+ (AF_INET SOCK_STREAM) | socket | AF_INET6 SOCK_DGRAM +--+-----+ setsockopt() ------ SO_REUSEADDR | | SO_RCVBUF …</description><content type="html"><![CDATA[
         <h2 id="socket-api-map">socket api map</h2>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-basic" data-lang="basic"><span class="line"><span class="cl"><span class="w">                                 </span><span class="o">+--------+</span>
 </span></span><span class="line"><span class="cl"><span class="p">(</span><span class="vg">AF_INET</span><span class="w">    </span><span class="vg">SOCK_STREAM</span><span class="p">)</span><span class="w">         </span><span class="o">|</span><span class="w"> </span><span class="vg">socket</span><span class="w"> </span><span class="o">|</span>
@@ -69,8 +116,8 @@
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-basic" data-lang="basic"><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="nl">192</span><span class="mf">.168.2.10.37120</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">192.168.2.10.54321</span><span class="o">:</span><span class="w"> </span><span class="vg">Flags</span><span class="w"> </span><span class="p">[</span><span class="vg">S</span><span class="p">],</span><span class="w"> </span><span class="vg">seq</span><span class="w"> </span><span class="il">3252709593</span><span class="p">,</span><span class="w"> </span><span class="vg">win</span><span class="w"> </span><span class="il">65495</span><span class="p">,</span><span class="w"> 
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="vg">options</span><span class="w"> </span><span class="p">[</span><span class="vg">mss</span><span class="w"> </span><span class="il">65495</span><span class="p">,</span><span class="vg">sackOK</span><span class="p">,</span><span class="vg">TS</span><span class="w"> </span><span class="vg">val</span><span class="w"> </span><span class="il">759990870</span><span class="w"> </span><span class="vg">ecr</span><span class="w"> </span><span class="il">0</span><span class="p">,</span><span class="vg">nop</span><span class="p">,</span><span class="vg">wscale</span><span class="w"> </span><span class="il">7</span><span class="p">],</span><span class="w"> </span><span class="vg">length</span><span class="w"> </span><span class="il">0</span>
-</span></span><span class="line"><span class="cl"><span class="nl">192</span><span class="mf">.168.2.10.54321</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">192.168.2.10.37120</span><span class="o">:</span><span class="w"> </span><span class="vg">Flags</span><span class="w"> </span><span class="p">[</span><span class="vg">S</span><span class="o">.</span><span class="p">],</span><span class="w"> </span><span class="vg">seq</span><span class="w"> </span><span class="il">139043462</span><span class="p">,</span><span class="w"> </span><span class="vg">ack</span><span class="w"> </span><span class="il">3252709594</span><span class="p">,</span><span class="w"> </span><span class="vg">win</span><span class="w"> </span><span class="il">65483</span><span class="p">,</span><span class="w"> 
-</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="vg">options</span><span class="w"> </span><span class="p">[</span><span class="vg">mss</span><span class="w"> </span><span class="il">65495</span><span class="p">,</span><span class="vg">sackOK</span><span class="p">,</span><span class="vg">TS</span><span class="w"> </span><span class="vg">val</span><span class="w"> </span><span class="il">759990870</span><span class="w"> </span><span class="vg">ecr</span><span class="w"> </span><span class="il">759990870</span><span class="p">,</span><span class="vg">nop</span><span class="p">,</span><span class="vg">wscale</span><span class="w"> </span><span class="il">7</span><span class="p">],</span><span class="w"> </span><span class="vg">length</span><span class="w"> </span><span class="il">0</span>
+</span></span><span class="line"><span class="cl"><span class="nl">192</span><span class="mf">.168.2.10.54321</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">192.168.2.10.37120</span><span class="o">:</span><span class="w"> </span><span class="vg">Flags</span><span class="w"> </span><span class="p">[</span><span class="vg">S</span><span class="o">.</span><span class="p">],</span><span class="w"> </span><span class="vg">seq</span><span class="w"> </span><span class="il">139043462</span><span class="p">,</span><span class="w"> </span><span class="vg">ack</span><span class="w"> </span><span class="il">3252709594</span><span class="p">,</span><span class="w"> </span><span class="vg">win</span><span class="w"> </span><span class="il">65483</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="vg">options</span><span class="w"> </span><span class="p">[</span><span class="vg">mss</span><span class="w"> </span><span class="il">65495</span><span class="p">,</span><span class="vg">sackOK</span><span class="p">,</span><span class="vg">TS</span><span class="w"> </span><span class="vg">val</span><span class="w"> </span><span class="il">759990870</span><span class="w"> </span><span class="vg">ecr</span><span class="w"> </span><span class="il">759990870</span><span class="p">,</span><span class="vg">nop</span><span class="p">,</span><span class="vg">wscale</span><span class="w"> </span><span class="il">7</span><span class="p">],</span><span class="w"> </span><span class="vg">length</span><span class="w"> </span><span class="il">0</span>
 </span></span><span class="line"><span class="cl"><span class="nl">192</span><span class="mf">.168.2.10.37120</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">192.168.2.10.54321</span><span class="o">:</span><span class="w"> </span><span class="vg">Flags</span><span class="w"> </span><span class="p">[</span><span class="o">.</span><span class="p">],</span><span class="w"> </span><span class="vg">ack</span><span class="w"> </span><span class="il">1</span><span class="p">,</span><span class="w"> </span><span class="vg">win</span><span class="w"> </span><span class="il">512</span><span class="p">,</span><span class="w"> 
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="vg">options</span><span class="w"> </span><span class="p">[</span><span class="vg">nop</span><span class="p">,</span><span class="vg">nop</span><span class="p">,</span><span class="vg">TS</span><span class="w"> </span><span class="vg">val</span><span class="w"> </span><span class="il">759990870</span><span class="w"> </span><span class="vg">ecr</span><span class="w"> </span><span class="il">759990870</span><span class="p">],</span><span class="w"> </span><span class="vg">length</span><span class="w"> </span><span class="il">0</span>
 </span></span><span class="line"><span class="cl"><span class="nl">192</span><span class="mf">.168.2.10.37120</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">192.168.2.10.54321</span><span class="o">:</span><span class="w"> </span><span class="vg">Flags</span><span class="w"> </span><span class="p">[</span><span class="vg">R</span><span class="o">.</span><span class="p">],</span><span class="w"> </span><span class="vg">seq</span><span class="w"> </span><span class="il">1</span><span class="p">,</span><span class="w"> </span><span class="vg">ack</span><span class="w"> </span><span class="il">1</span><span class="p">,</span><span class="w"> </span><span class="vg">win</span><span class="w"> </span><span class="il">512</span><span class="p">,</span><span class="w"> 
@@ -78,8 +125,8 @@
 </span></span></code></pre></div><h3 id="server-terminated">server terminated</h3>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-basic" data-lang="basic"><span class="line"><span class="cl"><span class="nl">192</span><span class="mf">.168.2.10.58730</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">192.168.2.10.54321</span><span class="o">:</span><span class="w"> </span><span class="vg">Flags</span><span class="w"> </span><span class="p">[</span><span class="vg">S</span><span class="p">],</span><span class="w"> </span><span class="vg">seq</span><span class="w"> </span><span class="il">559678739</span><span class="p">,</span><span class="w"> </span><span class="vg">win</span><span class="w"> </span><span class="il">65495</span><span class="p">,</span><span class="w"> 
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="vg">options</span><span class="w"> </span><span class="p">[</span><span class="vg">mss</span><span class="w"> </span><span class="il">65495</span><span class="p">,</span><span class="vg">sackOK</span><span class="p">,</span><span class="vg">TS</span><span class="w"> </span><span class="vg">val</span><span class="w"> </span><span class="il">800516176</span><span class="w"> </span><span class="vg">ecr</span><span class="w"> </span><span class="il">0</span><span class="p">,</span><span class="vg">nop</span><span class="p">,</span><span class="vg">wscale</span><span class="w"> </span><span class="il">7</span><span class="p">],</span><span class="w"> </span><span class="vg">length</span><span class="w"> </span><span class="il">0</span>
-</span></span><span class="line"><span class="cl"><span class="nl">192</span><span class="mf">.168.2.10.54321</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">192.168.2.10.58730</span><span class="o">:</span><span class="w"> </span><span class="vg">Flags</span><span class="w"> </span><span class="p">[</span><span class="vg">S</span><span class="o">.</span><span class="p">],</span><span class="w"> </span><span class="vg">seq</span><span class="w"> </span><span class="il">2091989194</span><span class="p">,</span><span class="w"> </span><span class="vg">ack</span><span class="w"> </span><span class="il">559678740</span><span class="p">,</span><span class="w"> </span><span class="vg">win</span><span class="w"> </span><span class="il">65483</span><span class="p">,</span><span class="w"> 
-</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="vg">options</span><span class="w"> </span><span class="p">[</span><span class="vg">mss</span><span class="w"> </span><span class="il">65495</span><span class="p">,</span><span class="vg">sackOK</span><span class="p">,</span><span class="vg">TS</span><span class="w"> </span><span class="vg">val</span><span class="w"> </span><span class="il">800516176</span><span class="w"> </span><span class="vg">ecr</span><span class="w"> </span><span class="il">800516176</span><span class="p">,</span><span class="vg">nop</span><span class="p">,</span><span class="vg">wscale</span><span class="w"> </span><span class="il">7</span><span class="p">],</span><span class="w"> </span><span class="vg">length</span><span class="w"> </span><span class="il">0</span>
+</span></span><span class="line"><span class="cl"><span class="nl">192</span><span class="mf">.168.2.10.54321</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">192.168.2.10.58730</span><span class="o">:</span><span class="w"> </span><span class="vg">Flags</span><span class="w"> </span><span class="p">[</span><span class="vg">S</span><span class="o">.</span><span class="p">],</span><span class="w"> </span><span class="vg">seq</span><span class="w"> </span><span class="il">2091989194</span><span class="p">,</span><span class="w"> </span><span class="vg">ack</span><span class="w"> </span><span class="il">559678740</span><span class="p">,</span><span class="w"> </span><span class="vg">win</span><span class="w"> </span><span class="il">65483</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="w">        </span><span class="vg">options</span><span class="w"> </span><span class="p">[</span><span class="vg">mss</span><span class="w"> </span><span class="il">65495</span><span class="p">,</span><span class="vg">sackOK</span><span class="p">,</span><span class="vg">TS</span><span class="w"> </span><span class="vg">val</span><span class="w"> </span><span class="il">800516176</span><span class="w"> </span><span class="vg">ecr</span><span class="w"> </span><span class="il">800516176</span><span class="p">,</span><span class="vg">nop</span><span class="p">,</span><span class="vg">wscale</span><span class="w"> </span><span class="il">7</span><span class="p">],</span><span class="w"> </span><span class="vg">length</span><span class="w"> </span><span class="il">0</span>
 </span></span><span class="line"><span class="cl"><span class="nl">192</span><span class="mf">.168.2.10.58730</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">192.168.2.10.54321</span><span class="o">:</span><span class="w"> </span><span class="vg">Flags</span><span class="w"> </span><span class="p">[</span><span class="o">.</span><span class="p">],</span><span class="w"> </span><span class="vg">ack</span><span class="w"> </span><span class="il">1</span><span class="p">,</span><span class="w"> </span><span class="vg">win</span><span class="w"> </span><span class="il">512</span><span class="p">,</span><span class="w"> 
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="vg">options</span><span class="w"> </span><span class="p">[</span><span class="vg">nop</span><span class="p">,</span><span class="vg">nop</span><span class="p">,</span><span class="vg">TS</span><span class="w"> </span><span class="vg">val</span><span class="w"> </span><span class="il">800516176</span><span class="w"> </span><span class="vg">ecr</span><span class="w"> </span><span class="il">800516176</span><span class="p">],</span><span class="w"> </span><span class="vg">length</span><span class="w"> </span><span class="il">0</span>
 </span></span><span class="line"><span class="cl">
@@ -393,7 +440,7 @@ If the IP layer has data to transmit and the length of the data is larger than t
 <a href="https://stackoverflow.com/questions/34389620/telnet-unable-to-connect-to-remote-host-connection-refused" >stackoverflow - enable telnet server</a></em></li>
 </ul>
 
-      ]]></content></entry><entry><title>gcc optimization</title><id>/post/0009/</id><link href="/post/0009/" rel="alternate" type="text/html"/><updated>2023-09-15T00:43:38Z</updated><published>2023-09-15T00:43:38Z</published><description>what is optimization for a program?
+      ]]></content></entry><entry><title>Gcc optimization</title><id>/post/0009/</id><link href="/post/0009/" rel="alternate" type="text/html"/><updated>2023-09-15T00:43:38Z</updated><published>2023-09-15T00:43:38Z</published><description>what is optimization for a program?
 run faster use less memory, or consume fewer system resources. This can involve various techniques such …</description><content type="html"><![CDATA[
         <p>what is optimization for a program?</p>
 <ul>
@@ -583,17 +630,17 @@ run faster use less memory, or consume fewer system resources. This can involve 
 </span></span><span class="line"><span class="cl">                           <span class="p">|</span>               <span class="p">|</span>  <span class="p">|</span>    +---------------+
 </span></span><span class="line"><span class="cl">                           +---------------+  +---&gt;+    <span class="nb">test</span> n     <span class="p">|</span>
 </span></span><span class="line"><span class="cl">                                                   +---------------+
-</span></span></code></pre></div><p>gtest 在易用性上做得更好，接口封装的很干净。支持事件机制，方便性也满足了，最后看下可视化方面。</p>
+</span></span></code></pre></div><p>gtest 在易用性上做得更好（支持通配过滤，如 <code>--gtest_filter=*</code>），接口封装的很干净。支持事件机制，方便性也满足了，最后看下可视化方面。</p>
 <h2 id="可视化">可视化</h2>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 执行 gtest 程序，并输出为 xml</span>
 </span></span><span class="line"><span class="cl">$ ./a.out --gtest_output<span class="o">=</span>xml:./result.xml
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># xml 转 html</span>
 </span></span><span class="line"><span class="cl"><span class="c1"># 参考 https://gitlab.uni-koblenz.de/agrt/gtest2html readme介绍</span>
-</span></span></code></pre></div><p>可视化上 cunit 自带显示 xml 的方式，gtest 需要第三方工具转换。</p>
+</span></span></code></pre></div><p>可视化上 cunit 自带显示 xml 的工具，gtest 需要第三方工具转换。</p>
 <p>有一说一，cunit 输出页面风格还是很好看的。</p>
 <h2 id="集成到-cmake">集成到 CMake</h2>
-<p>cmake 版本，1.13 开始需要 c++14 的支持，1.12 需要 c++11。大多实际项目也不会盲目引进 c++14 的特性，因此，指定 1.12 一般够用了。</p>
+<p>gtest 从 1.13 开始需要 c++14 的支持，1.12 需要 c++11。大多实际项目也不会盲目引进 c++14 的特性，因此，指定 1.12 一般够用了。</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cmake" data-lang="cmake"><span class="line"><span class="cl"><span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CXX_STANDARD</span> <span class="s">11</span><span class="p">)</span><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CXX_STANDARD_REQUIRED</span> <span class="s">ON</span><span class="p">)</span><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="err">
@@ -618,7 +665,111 @@ run faster use less memory, or consume fewer system resources. This can involve 
 </span></span></span><span class="line"><span class="cl"><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">add_executable</span><span class="p">(</span><span class="s">exec_name</span> <span class="s">exec_name.cc</span><span class="p">)</span><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">exec_name</span> <span class="s">gtest</span> <span class="s">gtest_main</span><span class="p">)</span><span class="err">
-</span></span></span></code></pre></div><h2 id="总结">总结</h2>
+</span></span></span></code></pre></div><h2 id="用法">用法</h2>
+<p>gtest 的判断分为断言 ASSERT_ 和期望 EXPECT_，两者在执行时的区别相当于 break 和 continue。</p>
+<p>判断类型速查：</p>
+<table>
+<thead>
+<tr>
+<th>主要判断类型</th>
+<th>宏</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>布尔判断</td>
+<td>_TRUE(condition)</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>_FALSE(condition)</td>
+<td></td>
+</tr>
+<tr>
+<td>整型判断</td>
+<td>_EQ(expect, actual)</td>
+<td>==</td>
+</tr>
+<tr>
+<td></td>
+<td>_NE(expect, actual)</td>
+<td>!=</td>
+</tr>
+<tr>
+<td></td>
+<td>_LT(expect, actual)</td>
+<td>&lt;</td>
+</tr>
+<tr>
+<td></td>
+<td>_LE(expect, actual)</td>
+<td>&lt;=</td>
+</tr>
+<tr>
+<td></td>
+<td>_GT(expect, actual)</td>
+<td>&gt;</td>
+</tr>
+<tr>
+<td></td>
+<td>_GE(expect, actual)</td>
+<td>&gt;=</td>
+</tr>
+<tr>
+<td>浮点型判断</td>
+<td>_FLOAT_EQ</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>_DOUBLE_EQ</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>_NEAR((v1, v2, abs_err))</td>
+<td>abs(v1, v2) &lt;=abs_err</td>
+</tr>
+<tr>
+<td>字符串判断</td>
+<td>_STREQ</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>_STRNE</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>_STRCASEEQ</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>_STRCASENE</td>
+<td></td>
+</tr>
+<tr>
+<td>异常判断</td>
+<td>_THROW(statement, expect_e)</td>
+<td>statement 抛出期望异常</td>
+</tr>
+<tr>
+<td></td>
+<td>_ANY_THROW(statement)</td>
+<td>statement 抛出任意异常</td>
+</tr>
+<tr>
+<td></td>
+<td>_NO_THROW(statement)</td>
+<td>statement 无异常</td>
+</tr>
+</tbody>
+</table>
+<h2 id="总结">总结</h2>
 <p>gtest 目前从我的使用角度来说，只剩下可视化这个问题了。如果 gtest 输出的 xml 支持 cunit 风格，且不需要太复杂的设置进行格式转换，就很好了。</p>
 <h2 id="参考">参考</h2>
 <ul>
@@ -660,15 +811,13 @@ run faster use less memory, or consume fewer system resources. This can involve 
 </li>
 </ul>
 
-      ]]></content></entry><entry><title>CMake components - use Doxygen</title><id>/post/0007/</id><link href="/post/0007/" rel="alternate" type="text/html"/><updated>2023-08-17T03:04:38Z</updated><published>2023-08-17T03:04:38Z</published><description>该图片由 Raka C. 在 Pixabay 上发布
-Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 根据需要修改 Doxyfile.in 里的选项
-# Project related configuration …</description><content type="html"><![CDATA[
-        <p>该图片由 Raka C. 在 Pixabay 上<a href="https://pixabay.com/zh/illustrations/dam-floodgate-stop-gates-8176005/">发布</a></p>
-<h2 id="doxygen-使用流程">Doxygen 使用流程</h2>
+      ]]></content></entry><entry><title>CMake components - use Doxygen</title><id>/post/0007/</id><link href="/post/0007/" rel="alternate" type="text/html"/><updated>2023-08-17T03:04:38Z</updated><published>2023-08-17T03:04:38Z</published><description>Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 根据需要修改 Doxyfile.in 里的选项，不过直接基于下面这份修改也不错。
+# Project related configuration options …</description><content type="html"><![CDATA[
+        <h2 id="doxygen-使用流程">Doxygen 使用流程</h2>
 <h3 id="1-生成配置">1. 生成配置</h3>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ doxygen -g Doxyfile.in
 </span></span></code></pre></div><h3 id="2-修改配置">2. 修改配置</h3>
-<p>根据需要修改 Doxyfile.in 里的选项</p>
+<p>根据需要修改 Doxyfile.in 里的选项，不过直接基于下面这份修改也不错。</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># Project related configuration options</span>
 </span></span><span class="line"><span class="cl"><span class="nv">DOXYFILE_ENCODING</span>      <span class="o">=</span> UTF-8
 </span></span><span class="line"><span class="cl"><span class="nv">PROJECT_NAME</span>           <span class="o">=</span> <span class="s2">&#34;My Project&#34;</span>
@@ -727,7 +876,7 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 </span></span></span><span class="line"><span class="cl"><span class="c"></span><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="nb">include</span><span class="p">(</span><span class="s">doxygen.cmake</span><span class="p">)</span><span class="err">
 </span></span></span></code></pre></div><h3 id="4-doxygen-注释风格">4. Doxygen 注释风格</h3>
-<p>Doxygen 支持多种评论风格，因此可以不断尝试，直到找到自己喜欢的一种。（见参考中的 CmdExample）</p>
+<p>Doxygen 支持多种评论风格，因此可以多次尝试，直到找到自己喜欢的一种。（见参考中的 CmdExample）</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/*! \brief Brief description.
 </span></span></span><span class="line"><span class="cl"><span class="cm"> *         Brief description continued.
 </span></span></span><span class="line"><span class="cl"><span class="cm"> *
@@ -754,6 +903,8 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 
 
 <img src="https://pic.imgdb.cn/item/64ddfb5d661c6c8e54ee0abf.png" alt=""  /></p>
+<h2 id="总结">总结</h2>
+<p>标题写的是 CMake 组件，但只要环境中有 Doxygen 工具就能使用。比如用 shell 或是别的方式替换 <code>@PROJECT_SOURCE_DIR@</code>，再集成到项目里，方法总是有的。</p>
 <h2 id="参考">参考</h2>
 <ul>
 <li><em><a href="https://www.doxygen.nl/manual/doxygen_usage.html">doxygen - Usage</a></em></li>
@@ -763,19 +914,8 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 <li><em><a href="https://www.cnblogs.com/the-capricornus/p/4717566.html">cmake - configure_file</a></em></li>
 </ul>
 
-      ]]></content></entry><entry><title>Intro to Tun/Tap</title><id>/post/0006/</id><link href="/post/0006/" rel="alternate" type="text/html"/><updated>2023-08-10T01:54:51Z</updated><published>2023-08-10T01:54:51Z</published><description>该图片由 Simon Oberthaler 在 Pixabay 上 发布
-原理 +---------------+ +---------------+ +---------------+ | application A | | application B | | …</description><content type="html"><![CDATA[
-        <p>该图片由 Simon Oberthaler 在 Pixabay 上
-
-
-
-
-
-
-
-
-<a href="https://pixabay.com/zh/photos/elephants-herd-pachyderms-mammals-8171393/" >发布</a></p>
-<h2 id="原理">原理</h2>
+      ]]></content></entry><entry><title>Intro to Tun/Tap</title><id>/post/0006/</id><link href="/post/0006/" rel="alternate" type="text/html"/><updated>2023-08-10T01:54:51Z</updated><published>2023-08-10T01:54:51Z</published><description>原理 +---------------+ +---------------+ +---------------+ | application A | | application B | | application C | +-------^-------+ …</description><content type="html"><![CDATA[
+        <h2 id="原理">原理</h2>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-basic" data-lang="basic"><span class="line"><span class="cl"><span class="o">+---------------+</span><span class="w">         </span><span class="o">+---------------+</span><span class="w">         </span><span class="o">+---------------+</span>
 </span></span><span class="line"><span class="cl"><span class="o">|</span><span class="w"> </span><span class="vg">application</span><span class="w"> </span><span class="vg">A</span><span class="w"> </span><span class="o">|</span><span class="w">         </span><span class="o">|</span><span class="w"> </span><span class="vg">application</span><span class="w"> </span><span class="vg">B</span><span class="w"> </span><span class="o">|</span><span class="w">         </span><span class="o">|</span><span class="w"> </span><span class="vg">application</span><span class="w"> </span><span class="vg">C</span><span class="w"> </span><span class="o">|</span>
 </span></span><span class="line"><span class="cl"><span class="o">+-------^-------+</span><span class="w">         </span><span class="o">+-------+-------+</span><span class="w">         </span><span class="o">+-------+-------+</span><span class="w">       </span><span class="vg">user</span><span class="o">-</span><span class="vg">mode</span>
@@ -940,10 +1080,8 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 </li>
 </ul>
 
-      ]]></content></entry><entry><title>Self-hosting services using the nginx ssl proxy</title><id>/post/0005/</id><link href="/post/0005/" rel="alternate" type="text/html"/><updated>2023-08-07T02:57:10Z</updated><published>2023-08-07T02:57:10Z</published><description>该图片由 Pete Linforth 在 Pixabay 上发布
-结构图 基础点 容器可以加入同一个网络中，并相互通过容器名通信 可以用 expect 脚本自动化控制命令行下程序与用户的交互 步骤 1. 生成自签名证书 openssl req -x509 -newkey …</description><content type="html"><![CDATA[
-        <p>该图片由 Pete Linforth 在 Pixabay 上<a href="https://pixabay.com/zh/illustrations/cyber-security-information-security-3400657/">发布</a></p>
-<h2 id="结构图">结构图</h2>
+      ]]></content></entry><entry><title>Self-hosting services with https</title><id>/post/0005/</id><link href="/post/0005/" rel="alternate" type="text/html"/><updated>2023-08-07T02:57:10Z</updated><published>2023-08-07T02:57:10Z</published><description>结构图 基础点 容器可以加入同一个网络中，并通过容器名相互通信 命令行下程序与用户的交互可以用 expect 脚本自动化控制 步骤 1. 生成自签名证书 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out …</description><content type="html"><![CDATA[
+        <h2 id="结构图">结构图</h2>
 <p>
 
 
@@ -954,13 +1092,14 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 <img src="https://pic.imgdb.cn/item/64d0e1231ddac507cc915777.png" alt=""  /></p>
 <h2 id="基础点">基础点</h2>
 <ol>
-<li>容器可以加入同一个网络中，并相互通过容器名通信</li>
-<li>可以用 expect 脚本自动化控制命令行下程序与用户的交互</li>
+<li>容器可以加入同一个网络中，并通过容器名相互通信</li>
+<li>命令行下程序与用户的交互可以用 expect 脚本自动化控制</li>
 </ol>
 <h2 id="步骤">步骤</h2>
 <h3 id="1-生成自签名证书">1. 生成自签名证书</h3>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days <span class="m">365</span>
 </span></span></code></pre></div><h3 id="2-配置-nginxconf">2. 配置 nginx.conf</h3>
+<p>指定证书，并设置代理转发</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">    server <span class="o">{</span>
 </span></span><span class="line"><span class="cl">        listen       <span class="m">11443</span> ssl<span class="p">;</span>
 </span></span><span class="line"><span class="cl">        server_name  localhost<span class="p">;</span>
@@ -981,6 +1120,7 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 </span></span><span class="line"><span class="cl">    <span class="c1">#    ...</span>
 </span></span><span class="line"><span class="cl">    <span class="c1"># }</span>
 </span></span></code></pre></div><h3 id="3-expect-脚本">3. expect 脚本</h3>
+<p>输入启动时的证书密码，这一步其实并不安全，完全是为了简化操作步骤。</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># pem.expect</span>
 </span></span><span class="line"><span class="cl"><span class="c1">#!/usr/bin/expect</span>
 </span></span><span class="line"><span class="cl">
@@ -990,11 +1130,11 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 </span></span><span class="line"><span class="cl">spawn /usr/local/nginx/sbin/nginx
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">expect <span class="o">{</span>
-</span></span><span class="line"><span class="cl">    <span class="s2">&#34;PEM&#34;</span> <span class="o">{</span> send <span class="s2">&#34;</span><span class="nv">$password</span><span class="s2">\r&#34;</span><span class="p">;</span> exp_continue <span class="o">}</span> <span class="c1"># 多个使用 SSL 的服务可以重复 send 多次</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;PEM&#34;</span> <span class="o">{</span> send <span class="s2">&#34;</span><span class="nv">$password</span><span class="s2">\r&#34;</span><span class="p">;</span> exp_continue <span class="o">}</span> <span class="c1"># 多个使用 SSL 的服务需要重复 send 多次</span>
 </span></span><span class="line"><span class="cl">    eof
 </span></span><span class="line"><span class="cl"><span class="o">}</span>
 </span></span></code></pre></div><h3 id="4-编译生成-nginx-镜像">4. 编译生成 nginx 镜像</h3>
-<p>也可以直接用现成的，打算熟悉下过程，有空读读源码</p>
+<p>也可以直接用 dockerhub 里现成的镜像，不过打算有空读读源码，先熟悉下过程</p>
 <p><code>docker build -t nginx-proxy .</code></p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">FROM</span><span class="s"> ubuntu</span><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="err"></span><span class="k">WORKDIR</span><span class="s"> /code</span><span class="err">
@@ -1042,21 +1182,13 @@ Doxygen 使用流程 1. 生成配置 $ doxygen -g Doxyfile.in 2. 修改配置 �
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ docker compose up -d
 </span></span><span class="line"><span class="cl">$ docker <span class="nb">exec</span> -it nginx-proxy expect pem.expect
 </span></span></code></pre></div><h2 id="总结">总结</h2>
-<p>容器隔离了环境，复杂度转移到了部署层面上。以上在查了不少资料后，成功使用 https 访问时居然产生了谜一般的成就感，有点离谱了……</p>
+<p>容器隔离了环境，复杂度一部分转移到了部署层面上。</p>
+<p>自签名证书一般多用于自嗨，不属于正规流派，应用场景不大。</p>
+<p>dockerfile 和 compose 还真是方便。</p>
 
-      ]]></content></entry><entry><title>Solve Common Memory Problems Using Dynamic Analysis Tools</title><id>/post/0004/</id><link href="/post/0004/" rel="alternate" type="text/html"/><updated>2023-08-06T07:52:05Z</updated><published>2023-08-06T07:52:05Z</published><description>该图片由 Jürgen 在 Pixabay 上 发布
-c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，asan 比 valgrind 更快，结果更精确，经过 time 测试，asan 消耗时间是 valgrind 的 1/30。 …</description><content type="html"><![CDATA[
-        <p>该图片由 Jürgen 在 Pixabay 上
-
-
-
-
-
-
-
-
-<a href="https://pixabay.com/zh/photos/ladybug-beetle-leaf-insect-bug-6364312/" >发布</a></p>
-<p>c/c++ 可使用检测工具<code>asan</code> <code>valgrind</code>定位程序问题。一般的检查，asan 比 valgrind 更快，结果更精确，经过 <code>time</code> 测试，asan 消耗时间是 valgrind 的 1/30。</p>
+      ]]></content></entry><entry><title>Memory problems in C</title><id>/post/0004/</id><link href="/post/0004/" rel="alternate" type="text/html"/><updated>2023-08-06T07:52:05Z</updated><published>2023-08-06T07:52:05Z</published><description>c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，asan 比 valgrind 更快，结果更精确，经过 time 测试，asan 消耗时间是 valgrind 的 1/30。
+环境 valgrind（3.21.0） gcc(13.1.1) …</description><content type="html"><![CDATA[
+        <p>c/c++ 可使用检测工具<code>asan</code> <code>valgrind</code>定位程序问题。一般的检查，asan 比 valgrind 更快，结果更精确，经过 <code>time</code> 测试，asan 消耗时间是 valgrind 的 1/30。</p>
 <h2 id="环境">环境</h2>
 <ul>
 <li>valgrind（3.21.0）</li>
@@ -1142,9 +1274,11 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 </span></span><span class="line"><span class="cl"><span class="o">==</span><span class="nv">212706</span><span class="o">==</span>ERROR: LeakSanitizer: detected memory leaks
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">Direct leak of <span class="m">100</span> byte<span class="o">(</span>s<span class="o">)</span> in <span class="m">1</span> object<span class="o">(</span>s<span class="o">)</span> allocated from:
-</span></span><span class="line"><span class="cl">    <span class="c1">#0 0x7f6aa04e1359 in __interceptor_malloc /usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">#1 0x55c93274c1aa in main ***************************/leak.c:7</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">#2 0x7f6aa023984f  (/usr/lib/libc.so.6+0x2384f) (BuildId: 2f005a79cd1a8e385972f5a102f16adba414d75e)</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">#0 0x7f6aa04e1359 in __interceptor_malloc </span>
+</span></span><span class="line"><span class="cl">					/usr/src/debug/gcc/gcc/libsanitizer/asan/asan_malloc_linux.cpp:69
+</span></span><span class="line"><span class="cl">    <span class="c1">#1 0x55c93274c1aa in main </span>
+</span></span><span class="line"><span class="cl">    			***************************/leak.c:7
+</span></span><span class="line"><span class="cl">    <span class="c1">#2 0x7f6aa023984f  (/usr/lib/libc.so.6+0x2384f) (BuildId: ****)</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">SUMMARY: AddressSanitizer: <span class="m">100</span> byte<span class="o">(</span>s<span class="o">)</span> leaked in <span class="m">1</span> allocation<span class="o">(</span>s<span class="o">)</span>.
 </span></span></code></pre></div><h3 id="线程问题附带测试">线程问题（附带测试）</h3>
@@ -1218,25 +1352,17 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 <a href="https://github.com/google/sanitizers" >Sanitizers</a></em></li>
 </ul>
 
-      ]]></content></entry><entry><title>Work With An Efficient Environment</title><id>/post/0003/</id><link href="/post/0003/" rel="alternate" type="text/html"/><updated>2023-08-06T01:08:47Z</updated><published>2023-08-06T01:08:47Z</published><description>该图片由 Gauthier Pous 在 Pixabay 上 发布
-经验分享 文本编辑器 - vim Vim 是高度可配置的，然而定制是一件很个性化的事情，因此我试图避免建议什么应该放进你的 vimrc 里，什么不应该。相反，本书关注的是 Vim 编辑器的核心功能。 …</description><content type="html"><![CDATA[
-        <p>该图片由 Gauthier Pous 在 Pixabay 上 
-
-
-
-
-
-
-
-
-<a href="https://pixabay.com/zh/photos/turtle-turtle-earth-land-market-5201848/" >发布</a></p>
-<h2 id="经验分享">经验分享</h2>
+      ]]></content></entry><entry><title>Work with an efficient environment</title><id>/post/0003/</id><link href="/post/0003/" rel="alternate" type="text/html"/><updated>2023-08-06T01:08:47Z</updated><published>2023-08-06T01:08:47Z</published><description>经验分享 文本编辑器 - vim 有段时间学人将 Vim 打造成 IDE，上一堆插件，改键盘映射；又学人将 NVim 打造成 IDE，上一堆插件，改键盘映射。
+常常插件一更新，一堆报错，又去看文档，修报错。折腾来折腾去，唯独专业知识没学上几分。
+就此老实了，写代码该用 IDE 就 …</description><content type="html"><![CDATA[
+        <h2 id="经验分享">经验分享</h2>
 <h3 id="文本编辑器---vim">文本编辑器 - vim</h3>
+<p>有段时间学人将 Vim 打造成 IDE，上一堆插件，改键盘映射；又学人将 NVim 打造成 IDE，上一堆插件，改键盘映射。</p>
+<p>常常插件一更新，一堆报错，又去看文档，修报错。折腾来折腾去，唯独专业知识没学上几分。</p>
+<p>就此老实了，写代码该用 IDE 就用 IDE，慢慢理解 Vim 核心功能才是正道。</p>
 <blockquote>
 <p>Vim 是高度可配置的，然而定制是一件很个性化的事情，因此我试图避免建议什么应该放进你的 vimrc 里，什么不应该。相反，本书关注的是 Vim 编辑器的核心功能。不管你是通过 SSH 登录远端服务器工作，还是在用本地安装了插件而增添了额外功能的 GVim，这些功能都永远在那儿。精通了 Vim 的核心功能，你就获得了一个可移植的、强大的文本编辑工具。</p>
 </blockquote>
-<p>之前求快，学人将 Vim 打造成 IDE，上一堆插件，改键盘映射；又学人将 NVim 打造成 IDE，上一堆插件，改键盘映射。常常插件一更新，一堆报错，又去看文档，修报错。折腾来折腾去，唯独专业知识没学上几分。</p>
-<p>就此老实了，写代码该用 IDE 就用 IDE，慢慢理解 Vim 核心功能才是正道。</p>
 <ul>
 <li>
 <p>练习 vimtutor (20min)</p>
@@ -1249,7 +1375,8 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 </li>
 </ul>
 <p>Slow is Smooth, and Smooth is Fast.</p>
-<h3 id="交互式shell---zshhttpsgithubcomzsh-userszsh">交互式shell - 
+<p>R.I.P Bram 2023/08/03 Esc :wq</p>
+<h3 id="交互式-shell---zshhttpsgithubcomzsh-userszsh">交互式 shell - 
 
 
 
@@ -1297,8 +1424,7 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 
 
 <a href="https://github.com/tmux/tmux" >tmux</a></h3>
-<p>工作中经常远程连接服务器的人，大多经历过链接断开的情况。随着 ssh 断连，正在进行的代码编译、定位bug、修改配置等多个窗口都没了，又要耐着性子重连，敲命令配置。</p>
-<p>或者，今天需要继续昨天做不完的工作，通过 tmux 保留工作环境可以省时间，还能帮助回忆起之前的思路。</p>
+<p>工作中经常远程连接服务器的人，大多经历过链接断开的情况。ssh 一断连，正在进行的代码编译、定位bug、修改配置等多个窗口就都没了，又要耐着性子重连，敲命令配置。</p>
 <ul>
 <li>
 
@@ -1326,7 +1452,7 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 </span></span><span class="line"><span class="cl"><span class="nb">set</span> -g default-shell /bin/zsh
 </span></span><span class="line"><span class="cl"><span class="nb">set</span> -g default-command /bin/zsh
 </span></span><span class="line"><span class="cl">:wq
-</span></span></code></pre></div><p>借助 
+</span></span></code></pre></div><p>或者，今天需要继续昨天的工作，通过 tmux 保留工作环境，帮助回忆思路。借助 
 
 
 
@@ -1353,7 +1479,7 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 
 
 
-<a href="https://github.com/tmux-plugins/tmux-resurrect/blob/master/docs/restoring_pane_contents.md" >会话内容保存</a></p>
+<a href="https://github.com/tmux-plugins/tmux-resurrect/blob/master/docs/restoring_pane_contents.md" >会话内容保存</a>。</p>
 <h3 id="垃圾回收---trash-clihttpsgithubcomandreafranciatrash-cli">垃圾回收 - 
 
 
@@ -1364,7 +1490,7 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 
 
 <a href="https://github.com/andreafrancia/trash-cli" >trash-cli</a></h3>
-<p>单纯防止误删文件导致不必要的麻烦。</p>
+<p>单纯防止误删文件导致不必要的麻烦。从使用经历来看，虽然只有一两次，但确实帮了大忙。</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># 安装</span>
 </span></span><span class="line"><span class="cl">$ sudo pacman -S trash-cli
 </span></span><span class="line"><span class="cl">
@@ -1395,7 +1521,7 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 </span></span><span class="line"><span class="cl"><span class="c1"># 连接</span>
 </span></span><span class="line"><span class="cl">$ ssh ecs
 </span></span></code></pre></div><h3 id="远程同步---rsync">远程同步 - rsync</h3>
-<p>配合上面的远程连接使用效果更佳</p>
+<p>配合上面的远程连接使用效果更佳。也可用于本地文件同步，但本地一般直接上版本控制来管理。</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl">$ rsync -av <span class="nb">source</span> ecs:/code/
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># -a             递归同步文件元信息</span>
@@ -1404,34 +1530,8 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 </span></span><span class="line"><span class="cl"><span class="c1"># --delete       同步时 dst 将删除 src 中没有的文件</span>
 </span></span><span class="line"><span class="cl"><span class="c1"># --link-desk    指定基准目录增量备份</span>
 </span></span><span class="line"><span class="cl"><span class="c1"># --exclude=path 同步时排除 path </span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 脚本来源 https://www.ruanyifeng.com/blog/2020/08/rsync.html</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># 根据需要修改路径，还是很实用的</span>
-</span></span><span class="line"><span class="cl"><span class="c1">#!/bin/bash</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># A script to perform incremental backups using rsync</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="nb">set</span> -o errexit
-</span></span><span class="line"><span class="cl"><span class="nb">set</span> -o nounset
-</span></span><span class="line"><span class="cl"><span class="nb">set</span> -o pipefail
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="nb">readonly</span> <span class="nv">SOURCE_DIR</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">HOME</span><span class="si">}</span><span class="s2">&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="nb">readonly</span> <span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">&#34;/mnt/data/backups&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="nb">readonly</span> <span class="nv">DATETIME</span><span class="o">=</span><span class="s2">&#34;</span><span class="k">$(</span>date <span class="s1">&#39;+%Y-%m-%d_%H:%M:%S&#39;</span><span class="k">)</span><span class="s2">&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="nb">readonly</span> <span class="nv">BACKUP_PATH</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">BACKUP_DIR</span><span class="si">}</span><span class="s2">/</span><span class="si">${</span><span class="nv">DATETIME</span><span class="si">}</span><span class="s2">&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="nb">readonly</span> <span class="nv">LATEST_LINK</span><span class="o">=</span><span class="s2">&#34;</span><span class="si">${</span><span class="nv">BACKUP_DIR</span><span class="si">}</span><span class="s2">/latest&#34;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">mkdir -p <span class="s2">&#34;</span><span class="si">${</span><span class="nv">BACKUP_DIR</span><span class="si">}</span><span class="s2">&#34;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">rsync -av --delete <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="s2">&#34;</span><span class="si">${</span><span class="nv">SOURCE_DIR</span><span class="si">}</span><span class="s2">/&#34;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --link-dest <span class="s2">&#34;</span><span class="si">${</span><span class="nv">LATEST_LINK</span><span class="si">}</span><span class="s2">&#34;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  --exclude<span class="o">=</span><span class="s2">&#34;.cache&#34;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl"><span class="se"></span>  <span class="s2">&#34;</span><span class="si">${</span><span class="nv">BACKUP_PATH</span><span class="si">}</span><span class="s2">&#34;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">rm -rf <span class="s2">&#34;</span><span class="si">${</span><span class="nv">LATEST_LINK</span><span class="si">}</span><span class="s2">&#34;</span>
-</span></span><span class="line"><span class="cl">ln -s <span class="s2">&#34;</span><span class="si">${</span><span class="nv">BACKUP_PATH</span><span class="si">}</span><span class="s2">&#34;</span> <span class="s2">&#34;</span><span class="si">${</span><span class="nv">LATEST_LINK</span><span class="si">}</span><span class="s2">&#34;</span>
-</span></span></code></pre></div><h3 id="keyboard-shortcuts">Keyboard Shortcuts</h3>
+</span></span><span class="line"><span class="cl"><span class="c1"># ...</span>
+</span></span></code></pre></div><h3 id="键盘快捷键">键盘快捷键</h3>
 <p>自从脱离鼠标后，鼠标手以及颈椎疼痛慢慢消失了。日常大部分时间都在下面两个应用里，多用用快捷键对健康还是有好处的（通过触摸屏操作指针去&quot;够&quot;某个目标，次数多了，也是比较累的）。</p>
 <ul>
 <li>
@@ -1455,7 +1555,7 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 
 <a href="https://code.visualstudio.com/docs/getstarted/keybindings#_keyboard-shortcuts-reference" >vscode 键盘快捷键</a></li>
 </ul>
-<p>vscode 还贴心地给出了打印版的 一页
+<p>vscode 还贴心地给出了打印版的一页
 
 
 
@@ -1490,15 +1590,13 @@ c/c++ 可使用检测工具asan valgrind定位程序问题。一般的检查，a
 <li><em>Vim 实用技巧</em></li>
 <li><em>Vim8 文本处理实战</em></li>
 </ul>
-<h2 id="rip-bram">R.I.P Bram</h2>
-<p>2023/08/03 Esc :wq</p>
 
-      ]]></content></entry><entry><title>SVN Command Line Usage With Docker</title><id>/post/0002/</id><link href="/post/0002/" rel="alternate" type="text/html"/><updated>2023-08-05T00:22:28Z</updated><published>2023-08-05T00:22:28Z</published><description>该图片由 Gerd Altmann 在 Pixabay 上发布
-Self-Hosted SVN 服务属于 IO 密集型任务。相比于 Git，更适合于频繁进行大型二进制文件的存取。且内存占用极低，从自搭建情况看，一般在 3MB 左右，峰值传输 20MB 左右。
+      ]]></content></entry><entry><title>SVN usage with Docker</title><id>/post/0002/</id><link href="/post/0002/" rel="alternate" type="text/html"/><updated>2023-08-05T00:22:28Z</updated><published>2023-08-05T00:22:28Z</published><description>该图片由 Gerd Altmann 在 Pixabay 上发布
+Self-Hosted SVN 服务属于 IO 密集型任务。且相比于 Git，更适合于频繁进行大型二进制文件的存取。其内存占用极低，从自搭建情况看，一般在 3MB 左右，峰值传输 20MB 左右。
 Server …</description><content type="html"><![CDATA[
         <p>该图片由 Gerd Altmann 在 Pixabay 上<a href="https://pixabay.com/zh/photos/a-book-library-read-literature-3480216/">发布</a></p>
 <h2 id="self-hosted">Self-Hosted</h2>
-<p>SVN 服务属于 IO 密集型任务。相比于 Git，更适合于频繁进行大型二进制文件的存取。且内存占用极低，从自搭建情况看，一般在 3MB 左右，峰值传输 20MB 左右。</p>
+<p>SVN 服务属于 IO 密集型任务。且相比于 Git，更适合于频繁进行大型二进制文件的存取。其内存占用极低，从自搭建情况看，一般在 3MB 左右，峰值传输 20MB 左右。</p>
 <h2 id="server-with-docker">Server with docker</h2>
 <ol>
 <li>安装服务 <code>docker compose up -d</code></li>
@@ -1518,7 +1616,7 @@ Server …</description><content type="html"><![CDATA[
 <p>生成仓库 <code>docker exec -it svn-server svnadmin create repo</code></p>
 </li>
 <li>
-<p>配置仓库账户文件 位于 <code>^/repo/conf/{svnserver.conf passwd authz}</code></p>
+<p>配置 仓库账户文件位于 <code>^/repo/conf/{svnserver.conf passwd authz}</code></p>
 </li>
 </ol>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="c1"># svnserver.conf</span>
@@ -1538,11 +1636,7 @@ Server …</description><content type="html"><![CDATA[
 <li>其余命令用到再查 <code>svn -h</code></li>
 </ol>
 <h2 id="usage">Usage</h2>
-<blockquote>
-<p>我是为了这点醋，才包的这顿饺子</p>
-</blockquote>
-<h3 id="搭建书库">搭建书库</h3>
-<p>拥有一座图书馆听起来很酷，按照 <a href="https://gist.github.com/zexsphere/604a37648b7ac04cd99a5ebbd851d699">中图法</a> 将现有书籍分类，托管于云端 SVN 服务中。</p>
+<p>主要用于个人的二进制文件存储，比如电子书籍、照片之类。</p>
 <p>
 
 
