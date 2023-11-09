@@ -1,0 +1,2 @@
+User-agent: *
+Sitemap: https://zexsphere.github.io/sitemap.xml
